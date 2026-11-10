@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeSchool Казахстан — Служба доверия</title>
     
-    <!-- PWA Манифест -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"SafeSchool","short_name":"SafeSchool","start_url":"./","display":"standalone","background_color":"#0f172a","theme_color":"#e11d48","icons":[{"src":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Emblem_of_Kazakhstan.svg/512px-Emblem_of_Kazakhstan.svg.png","sizes":"512x512","type":"image/png"}]}'>
+    <link rel="manifest" href="manifest.json">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -33,8 +32,8 @@
             </div>
             
             <div class="flex items-center space-x-2">
-                <!-- Кнопка установки на телефон -->
-                <button id="installPwaBtn" onclick="installPwa()" class="hidden text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-400 font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-200 transition">📲 Установить</button>
+                <!-- КНОПКА УСТАНОВКИ (ВСЕГДА ВИДНА) -->
+                <button id="installPwaBtn" onclick="installPwa()" class="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-400 font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-200 transition">📲 Установить</button>
 
                 <!-- Кнопка SOS -->
                 <button id="sosBtn" onclick="quickExit()" class="text-xs bg-red-600 text-white border border-red-700 font-bold px-3 py-1.5 rounded-lg hover:bg-red-700 transition shadow-md animate-pulse">🆘 SOS</button>
@@ -230,13 +229,10 @@
     </div>
 
     <script>
-        // --- ВСТРОЕННЫЙ SERVICE WORKER (для установки в 1 файл) ---
+        // --- РЕГИСТРАЦИЯ SERVICE WORKER ---
         if ('serviceWorker' in navigator) {
-            const swCode = `self.addEventListener('install', (e) => { self.skipWaiting(); }); self.addEventListener('fetch', (e) => { });`;
-            const blob = new Blob([swCode], { type: 'application/javascript' });
-            const swUrl = URL.createObjectURL(blob);
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register(swUrl).catch(err => console.log('SW error', err));
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error', err));
             });
         }
 
@@ -257,18 +253,21 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            document.getElementById('installPwaBtn').classList.remove('hidden');
         });
 
         function installPwa() {
             if (deferredPrompt) {
+                // Если браузер готов, показываем родное окно установки
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
-                        document.getElementById('installPwaBtn').classList.add('hidden');
+                        document.getElementById('installPwaBtn').innerText = "✅ Установлено";
                     }
                     deferredPrompt = null;
                 });
+            } else {
+                // Если браузер не готов (не созданы файлы или кэш), даем инструкцию
+                alert("Чтобы установить приложение SafeSchool:\n\n1. Нажмите на три точки (⋮) в правом верхнем углу браузера Chrome.\n2. Выберите «Установить приложение» или «Добавить на главный экран».\n\n(Если вы на iPhone, нажмите кнопку «Поделиться» и выберите «На экран Домой»).");
             }
         }
 
