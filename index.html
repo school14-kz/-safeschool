@@ -30,7 +30,6 @@
             </div>
             
             <div class="flex items-center space-x-2">
-                <!-- Кнопка SOS -->
                 <button id="sosBtn" onclick="quickExit()" class="text-xs bg-red-600 text-white border border-red-700 font-bold px-3 py-1.5 rounded-lg hover:bg-red-700 transition shadow-md animate-pulse">🆘 SOS</button>
 
                 <button onclick="toggleTheme()" class="text-sm p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 transition">
@@ -38,7 +37,7 @@
                 </button>
 
                 <button id="roleToggleBtn" onclick="openLoginModal()" class="relative text-xs bg-rose-50 text-rose-600 border border-rose-200 dark:bg-slate-700 dark:text-rose-400 dark:border-slate-600 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-slate-600 transition">
-                    👩‍⚕️ Психолог
+                    <span id="btnText">👩‍⚕️ Психолог</span>
                     <span id="newBadge" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
@@ -52,6 +51,12 @@
 
         <!-- СТРАНИЦА УЧЕНИКА -->
         <div id="studentView" class="space-y-5">
+            
+            <!-- Плашка: Вы в режиме ученика (показывается только психологу) -->
+            <div id="previewBanner" class="hidden bg-purple-100 dark:bg-purple-900/40 border border-purple-300 dark:border-purple-700 p-3 rounded-xl flex items-center justify-between">
+                <span class="text-xs font-bold text-purple-800 dark:text-purple-300">👁️ Режим ученика (вы все еще в системе)</span>
+                <button onclick="showPsychologist()" class="text-xs bg-purple-600 text-white font-bold px-3 py-1.5 rounded-lg hover:bg-purple-700 transition">🔙 В кабинет</button>
+            </div>
             
             <div id="myTicketsSection" class="hidden bg-white dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-2xl p-5 shadow-sm transition-colors">
                 <div class="flex items-center justify-between mb-3">
@@ -160,7 +165,7 @@
                 </div>
                 <div class="flex gap-2">
                     <button onclick="playNotificationSound()" class="bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-400 text-emerald-700 text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1">🔊 Тест звука</button>
-                    <button onclick="logoutPsychologist()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-xs font-semibold px-4 py-2 rounded-xl transition">Выйти</button>
+                    <button onclick="logoutPsychologist()" class="bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/50 dark:text-rose-400 text-rose-700 text-xs font-bold px-4 py-2 rounded-xl transition">🚪 Выйти</button>
                 </div>
             </div>
 
@@ -218,7 +223,7 @@
         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full shadow-xl text-center space-y-4 transition-colors">
             <div class="text-4xl">✅</div>
             <h3 class="font-bold text-lg text-slate-900 dark:text-white">Обращение отправлено!</h3>
-            <p class="text-xs text-slate-600 dark:text-slate-300">Психолог уже видит ваше сообщение. Пожалуйста, ожидайте ответа. Статус и ответ появятся на главной странице в блоке <b>«📌 Мои сообщения»</b>.</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300">Психолог уже видит ваше сообщение. Статус и ответ появятся на главной странице в блоке <b>«📌 Мои сообщения»</b>.</p>
             <button onclick="closeSuccessModal()" class="w-full bg-slate-900 dark:bg-slate-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-800 transition mt-2">Понятно</button>
         </div>
     </div>
@@ -235,6 +240,15 @@
         const PSYCHOLOGIST_PASSWORD = 'bagdagul';
         let myReportIds = JSON.parse(localStorage.getItem('safe_school_my_reports')) || [];
         let statsChartInstance = null;
+
+        // Сохраняем HTML значка, чтобы не терять его при переключениях
+        const BADGE_HTML = '<span id="newBadge" class="hidden absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span></span>';
+
+        function setHeaderButton(text, onclickFunc) {
+            const btn = document.getElementById('roleToggleBtn');
+            btn.innerHTML = '<span id="btnText">' + text + '</span>' + BADGE_HTML;
+            btn.setAttribute('onclick', onclickFunc);
+        }
 
         // --- ТЕМНАЯ ТЕМА ---
         const html = document.documentElement;
@@ -284,19 +298,13 @@
             const ctx = document.getElementById('statsChart').getContext('2d');
             const counts = {};
             reports.forEach(r => { counts[r.category] = (counts[r.category] || 0) + 1; });
-            
             const labels = Object.keys(counts);
             const data = Object.values(counts);
-
             if (statsChartInstance) statsChartInstance.destroy();
             if (labels.length === 0) return;
-
             statsChartInstance = new Chart(ctx, {
                 type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{ data: data, backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#64748b'], borderWidth: 0 }]
-                },
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#64748b'], borderWidth: 0 }] },
                 options: { responsive: true, plugins: { legend: { display: false } }, cutout: '70%' }
             });
         }
@@ -312,7 +320,6 @@
             if (report.status === 'В работе') { statusText = "Психолог работает"; statusColor = "text-blue-600"; }
             if (report.status === 'Встреча') { statusText = "Назначена встреча"; statusColor = "text-purple-600"; }
             if (report.status === 'Решено') { statusText = "Вопрос решен"; statusColor = "text-emerald-600"; }
-
             let html = `
                 <div class="border-b border-slate-200 dark:border-slate-600 pb-2 mb-2 flex justify-between items-start">
                     <div><p class="text-[10px] uppercase text-slate-500">Статус:</p><p class="text-xs font-bold ${statusColor}">${statusText}</p></div>
@@ -342,7 +349,7 @@
                 </div>`).join('');
         }
 
-        // --- ОСТАЛЬНАЯ ЛОГИКА ---
+        // --- ЛОГИКА ---
         function toggleTips() {
             const content = document.getElementById('tipsContent'); const icon = document.getElementById('tipsIcon');
             if (content.classList.contains('hidden')) { content.classList.remove('hidden'); icon.style.transform = 'rotate(180deg)'; }
@@ -399,27 +406,49 @@
             else { alert('❌ Неверный пароль!'); }
         }
 
+        // ПОКАЗАТЬ КАБИНЕТ ПСИХОЛОГА
         function showPsychologist() {
             document.getElementById('studentView').classList.add('hidden');
             document.getElementById('psychologistView').classList.remove('hidden');
-            document.getElementById('sosBtn').classList.add('hidden'); 
-            document.getElementById('roleToggleBtn').innerText = "📱 Ученик";
-            document.getElementById('roleToggleBtn').setAttribute('onclick', 'switchToStudent()');
+            document.getElementById('sosBtn').classList.add('hidden');
+            document.getElementById('previewBanner').classList.add('hidden');
+            
+            // Кнопка в шапке: "Посмотреть как ученик"
+            setHeaderButton("📱 Ученик", "switchToStudent");
+            
             setFilter('active'); 
             localStorage.setItem('safe_school_psychologist', 'true');
+            localStorage.setItem('safe_school_view', 'psychologist');
             updateChart();
         }
 
+        // ПОКАЗАТЬ СТРАНИЦУ УЧЕНИКА
         function switchToStudent() {
             document.getElementById('psychologistView').classList.add('hidden');
             document.getElementById('studentView').classList.remove('hidden');
-            document.getElementById('sosBtn').classList.remove('hidden'); 
-            document.getElementById('roleToggleBtn').innerHTML = "👩‍⚕️ Психолог" + document.getElementById('newBadge').outerHTML;
-            document.getElementById('roleToggleBtn').setAttribute('onclick', 'openLoginModal()');
-            localStorage.setItem('safe_school_psychologist', 'false');
+            document.getElementById('sosBtn').classList.remove('hidden');
+            
+            const isPsychologist = localStorage.getItem('safe_school_psychologist') === 'true';
+            
+            if (isPsychologist) {
+                // Если залогинен — показываем плашку и кнопку возврата
+                document.getElementById('previewBanner').classList.remove('hidden');
+                setHeaderButton("🔙 В кабинет", "showPsychologist");
+                localStorage.setItem('safe_school_view', 'student');
+            } else {
+                document.getElementById('previewBanner').classList.add('hidden');
+                setHeaderButton("👩‍⚕️ Психолог", "openLoginModal");
+            }
         }
 
-        function logoutPsychologist() { switchToStudent(); }
+        // ПОЛНЫЙ ВЫХОД (только по кнопке "Выйти" в кабинете)
+        function logoutPsychologist() {
+            if (confirm('Выйти из кабинета психолога? Придется снова ввести пароль.')) {
+                localStorage.setItem('safe_school_psychologist', 'false');
+                localStorage.setItem('safe_school_view', 'student');
+                switchToStudent();
+            }
+        }
 
         async function submitReport(e) {
             e.preventDefault();
@@ -557,12 +586,21 @@
             }
         }
 
+        // ВОССТАНОВЛЕНИЕ СЕССИИ ПРИ ЗАГРУЗКЕ
         window.onload = () => {
             loadData();
-            if (localStorage.getItem('safe_school_psychologist') === 'true') {
+            const isPsychologist = localStorage.getItem('safe_school_psychologist') === 'true';
+            const currentView = localStorage.getItem('safe_school_view');
+            
+            if (isPsychologist && currentView !== 'student') {
+                // Психолог был в кабинете — возвращаем туда
                 showPsychologist();
+            } else if (isPsychologist && currentView === 'student') {
+                // Психолог залогинен, но смотрел страницу ученика — возвращаем на страницу ученика с плашкой
+                switchToStudent();
             } else {
-                document.getElementById('sosBtn').classList.remove('hidden');
+                // Обычный ученик
+                switchToStudent();
             }
         };
         setInterval(loadData, 3000); 
