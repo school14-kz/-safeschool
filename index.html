@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeSchool Казахстан — Служба доверия</title>
     
-    <!-- PWA Манифест (позволяет установить на телефон) -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"SafeSchool","short_name":"SafeSchool","start_url":"./","display":"standalone","background_color":"#f8fafc","theme_color":"#e11d48","icons":[{"src":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Emblem_of_Kazakhstan.svg/512px-Emblem_of_Kazakhstan.svg.png","sizes":"512x512","type":"image/png"}]}'>
+    <!-- PWA Манифест -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"SafeSchool","short_name":"SafeSchool","start_url":"./","display":"standalone","background_color":"#0f172a","theme_color":"#e11d48","icons":[{"src":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Emblem_of_Kazakhstan.svg/512px-Emblem_of_Kazakhstan.svg.png","sizes":"512x512","type":"image/png"}]}'>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -36,7 +36,7 @@
                 <!-- Кнопка установки на телефон -->
                 <button id="installPwaBtn" onclick="installPwa()" class="hidden text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-400 font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-200 transition">📲 Установить</button>
 
-                <!-- Кнопка SOS (только для учеников) -->
+                <!-- Кнопка SOS -->
                 <button id="sosBtn" onclick="quickExit()" class="text-xs bg-red-600 text-white border border-red-700 font-bold px-3 py-1.5 rounded-lg hover:bg-red-700 transition shadow-md animate-pulse">🆘 SOS</button>
 
                 <button onclick="toggleTheme()" class="text-sm p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 transition">
@@ -170,7 +170,6 @@
                 </div>
             </div>
 
-            <!-- СТАТИСТИКА И ГРАФИК -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors flex flex-col justify-center">
                     <span class="text-xs font-semibold uppercase text-slate-400 dark:text-slate-500">Всего заявок</span>
@@ -231,6 +230,16 @@
     </div>
 
     <script>
+        // --- ВСТРОЕННЫЙ SERVICE WORKER (для установки в 1 файл) ---
+        if ('serviceWorker' in navigator) {
+            const swCode = `self.addEventListener('install', (e) => { self.skipWaiting(); }); self.addEventListener('fetch', (e) => { });`;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register(swUrl).catch(err => console.log('SW error', err));
+            });
+        }
+
         const BIN_ID = "6af3158dffd5d16053b6a4ae"; 
         const MASTER_KEY = "$2a$10$5OG8yAXzsTfGHDGr/POtMOcu6YnKqlOE1CCYpXFlgRCCiVp7AwWOe";
         const API_URL = "https://api.jsonbin.io/v3/b/" + BIN_ID;
@@ -241,7 +250,27 @@
         let lastCount = 0; 
         const PSYCHOLOGIST_PASSWORD = 'bagdagul';
         let myReportIds = JSON.parse(localStorage.getItem('safe_school_my_reports')) || [];
-        let statsChartInstance = null; // Переменная для графика
+        let statsChartInstance = null;
+        let deferredPrompt;
+
+        // --- УСТАНОВКА НА ТЕЛЕФОН ---
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPwaBtn').classList.remove('hidden');
+        });
+
+        function installPwa() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('installPwaBtn').classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
 
         // --- ТЕМНАЯ ТЕМА ---
         const html = document.documentElement;
@@ -259,31 +288,10 @@
             }
         }
 
-        // --- БЫСТРЫЙ ВЫХОД (SOS) ---
-        function quickExit() {
-            window.location.replace("https://www.google.com/search?q=погода");
-        }
+        // --- БЫСТРЫЙ ВЫХОД ---
+        function quickExit() { window.location.replace("https://www.google.com/search?q=погода"); }
 
-        // --- УСТАНОВКА НА ТЕЛЕФОН (PWA) ---
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('installPwaBtn').classList.remove('hidden');
-        });
-        function installPwa() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        document.getElementById('installPwaBtn').classList.add('hidden');
-                    }
-                    deferredPrompt = null;
-                });
-            }
-        }
-
-        // --- ЗВУК (ТОЛЬКО ДЛЯ ПСИХОЛОГА) ---
+        // --- ЗВУК ---
         let audioCtx;
         document.body.addEventListener('click', function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -291,9 +299,8 @@
         });
 
         function playNotificationSound() {
-            if (!audioCtx) { alert("Нажмите на любую кнопку на экране, чтобы разрешить звук."); return; }
+            if (!audioCtx) { alert("Нажмите на любую кнопку для разрешения звука."); return; }
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            
             const playDing = (delay) => {
                 setTimeout(() => {
                     const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
@@ -308,43 +315,25 @@
             playDing(0); playDing(700); playDing(1400);
         }
 
-        // --- ГРАФИК СТАТИСТИКИ ---
+        // --- ГРАФИК ---
         function updateChart() {
             const ctx = document.getElementById('statsChart').getContext('2d');
-            
-            // Считаем количество по категориям
             const counts = {};
-            reports.forEach(r => {
-                counts[r.category] = (counts[r.category] || 0) + 1;
-            });
+            reports.forEach(r => { counts[r.category] = (counts[r.category] || 0) + 1; });
             
             const labels = Object.keys(counts);
             const data = Object.values(counts);
 
-            if (statsChartInstance) {
-                statsChartInstance.destroy(); // Удаляем старый график
-            }
-
+            if (statsChartInstance) statsChartInstance.destroy();
             if (labels.length === 0) return;
 
             statsChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#64748b'],
-                        borderWidth: 0
-                    }]
+                    datasets: [{ data: data, backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#64748b'], borderWidth: 0 }]
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { enabled: true }
-                    },
-                    cutout: '70%'
-                }
+                options: { responsive: true, plugins: { legend: { display: false } }, cutout: '70%' }
             });
         }
 
@@ -356,19 +345,15 @@
         // --- ОТРИСОВКА ДЛЯ УЧЕНИКА ---
         function generateStudentTicketHTML(report) {
             let statusText = "На рассмотрении"; let statusColor = "text-amber-600";
-            if (report.status === 'В работе') { statusText = "Психолог работает над вопросом"; statusColor = "text-blue-600"; }
+            if (report.status === 'В работе') { statusText = "Психолог работает"; statusColor = "text-blue-600"; }
             if (report.status === 'Встреча') { statusText = "Назначена встреча"; statusColor = "text-purple-600"; }
             if (report.status === 'Решено') { statusText = "Вопрос решен"; statusColor = "text-emerald-600"; }
 
             let html = `
                 <div class="border-b border-slate-200 dark:border-slate-600 pb-2 mb-2 flex justify-between items-start">
-                    <div>
-                        <p class="text-[10px] uppercase text-slate-500">Статус:</p>
-                        <p class="text-xs font-bold ${statusColor}">${statusText}</p>
-                    </div>
+                    <div><p class="text-[10px] uppercase text-slate-500">Статус:</p><p class="text-xs font-bold ${statusColor}">${statusText}</p></div>
                     <span class="text-[10px] bg-slate-100 dark:bg-slate-600 px-2 py-1 rounded">${report.date}</span>
-                </div>
-            `;
+                </div>`;
             if (report.meetingTime) html += `<p class="text-xs text-purple-600 font-bold mb-2">📅 Встреча: ${formatMeetingTime(report.meetingTime)}</p>`;
             if (report.replyToStudent) {
                 html += `<div><p class="text-[10px] uppercase text-slate-500 mb-1">Ответ психолога:</p><p class="text-xs text-slate-800 dark:text-white bg-indigo-50 dark:bg-slate-800 p-2 rounded-lg">${report.replyToStudent}</p></div>`;
@@ -379,10 +364,8 @@
         }
 
         function renderMyTickets() {
-            const section = document.getElementById('myTicketsSection');
-            const list = document.getElementById('myTicketsList');
+            const section = document.getElementById('myTicketsSection'), list = document.getElementById('myTicketsList');
             const myReports = reports.filter(r => myReportIds.includes(r.id));
-            
             if (myReports.length === 0) { section.classList.add('hidden'); return; }
             section.classList.remove('hidden');
             list.innerHTML = myReports.map(r => `
@@ -392,8 +375,7 @@
                         <span class="text-[10px] font-bold text-emerald-700">${r.category}</span>
                     </div>
                     ${generateStudentTicketHTML(r)}
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
         // --- ОСТАЛЬНАЯ ЛОГИКА ---
@@ -417,13 +399,11 @@
         async function loadData() {
             if (isFetching) return;
             if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') return;
-            
             isFetching = true;
             try {
                 const res = await fetch(`${API_URL}/latest`, { headers: { 'X-Master-Key': MASTER_KEY, 'X-Bin-Meta': 'false' } });
                 if (res.status === 429) { isFetching = false; return; }
                 if (!res.ok) throw new Error("Ошибка сети");
-                
                 const data = await res.json();
                 if (data && data.posts) {
                     if (data.posts.length > lastCount && lastCount > 0) {
@@ -438,7 +418,7 @@
                         renderReports(); renderMyTickets(); updateChart();
                     }
                 } else { await saveData(); }
-            } catch (e) { console.error("Ошибка загрузки:", e); } finally { isFetching = false; }
+            } catch (e) { console.error(e); } finally { isFetching = false; }
         }
 
         async function saveData() {
@@ -447,7 +427,7 @@
                     method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
                     body: JSON.stringify({ posts: reports })
                 });
-            } catch (e) { console.error("Ошибка сохранения:", e); alert("Ошибка соединения."); }
+            } catch (e) { alert("Ошибка сохранения."); }
         }
 
         function checkPassword() {
@@ -458,7 +438,7 @@
         function showPsychologist() {
             document.getElementById('studentView').classList.add('hidden');
             document.getElementById('psychologistView').classList.remove('hidden');
-            document.getElementById('sosBtn').classList.add('hidden'); // Скрываем SOS для психолога
+            document.getElementById('sosBtn').classList.add('hidden'); 
             document.getElementById('roleToggleBtn').innerText = "📱 Ученик";
             document.getElementById('roleToggleBtn').setAttribute('onclick', 'switchToStudent()');
             setFilter('active'); 
@@ -469,13 +449,13 @@
         function switchToStudent() {
             document.getElementById('psychologistView').classList.add('hidden');
             document.getElementById('studentView').classList.remove('hidden');
-            document.getElementById('sosBtn').classList.remove('hidden'); // Показываем SOS ученику
+            document.getElementById('sosBtn').classList.remove('hidden'); 
             document.getElementById('roleToggleBtn').innerHTML = "👩‍⚕️ Психолог" + document.getElementById('newBadge').outerHTML;
             document.getElementById('roleToggleBtn').setAttribute('onclick', 'openLoginModal()');
             localStorage.setItem('safe_school_psychologist', 'false');
         }
 
-        function logoutPsychologist() { switchToStudent(); alert('Вы вышли из кабинета психолога.'); }
+        function logoutPsychologist() { switchToStudent(); }
 
         async function submitReport(e) {
             e.preventDefault();
@@ -488,15 +468,11 @@
             reports.unshift(newReport); 
             myReportIds.push(newReport.id); localStorage.setItem('safe_school_my_reports', JSON.stringify(myReportIds));
             renderReports(); renderMyTickets(); await saveData(); 
-            
             document.getElementById('reportForm').reset();
             document.getElementById('successModal').classList.remove('hidden'); document.getElementById('successModal').classList.add('flex');
         }
 
-        // БЫСТРЫЕ ОТВЕТЫ
-        function applyQuickReply(id, text) {
-            document.getElementById(`reply-${id}`).value = text;
-        }
+        function applyQuickReply(id, text) { document.getElementById(`reply-${id}`).value = text; }
 
         function updateStatus(id, newStatus) {
             const report = reports.find(r => r.id === id);
@@ -506,30 +482,18 @@
         function saveMeetingTime(id) {
             const timeInput = document.getElementById(`meeting-${id}`).value;
             const report = reports.find(r => r.id === id);
-            if (report) {
-                report.meetingTime = timeInput; report.status = 'Встреча'; 
-                alert('✅ Время встречи назначено!'); renderReports(); renderMyTickets(); updateChart(); saveData();
-            }
+            if (report) { report.meetingTime = timeInput; report.status = 'Встреча'; alert('✅ Назначено!'); renderReports(); renderMyTickets(); updateChart(); saveData(); }
         }
 
         async function deleteReport(id) {
-            if (confirm('⚠️ Вы уверены, что хотите БЕЗВОЗВРАТНО удалить эту заявку?')) {
+            if (confirm('Удалить заявку?')) {
                 reports = reports.filter(r => r.id !== id); 
                 renderReports(); renderMyTickets(); updateChart(); await saveData(); lastCount = reports.length; 
             }
         }
 
-        function saveComment(id) {
-            const text = document.getElementById(`comment-${id}`).value.trim();
-            const report = reports.find(r => r.id === id);
-            if (report) { report.comment = text; alert('✅ Заметка сохранена!'); saveData(); }
-        }
-
-        function saveReply(id) {
-            const text = document.getElementById(`reply-${id}`).value.trim();
-            const report = reports.find(r => r.id === id);
-            if (report) { report.replyToStudent = text; alert('✅ Ответ отправлен ученику!'); renderMyTickets(); saveData(); }
-        }
+        function saveComment(id) { const text = document.getElementById(`comment-${id}`).value.trim(); const report = reports.find(r => r.id === id); if (report) { report.comment = text; alert('Заметка сохранена'); saveData(); } }
+        function saveReply(id) { const text = document.getElementById(`reply-${id}`).value.trim(); const report = reports.find(r => r.id === id); if (report) { report.replyToStudent = text; alert('Ответ отправлен ученику'); renderMyTickets(); saveData(); } }
 
         function statusClass(status) {
             if (status === 'Шутка / Ложный') return 'bg-red-100 text-red-700 border-red-200';
@@ -541,8 +505,7 @@
 
         function formatMeetingTime(datetimeStr) {
             if (!datetimeStr) return '';
-            const date = new Date(datetimeStr);
-            return date.toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+            return new Date(datetimeStr).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         }
 
         function renderReports() {
@@ -568,7 +531,6 @@
             } else {
                 listContainer.innerHTML = filtered.map(r => `
                     <div class="p-4 bg-slate-50 border-slate-200 dark:bg-slate-700 dark:border-slate-600 border rounded-xl space-y-3 shadow-sm transition-colors relative">
-                        
                         <div class="flex items-center justify-between flex-wrap gap-2">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class="text-sm font-bold text-slate-900 dark:text-white">${r.name}</span>
@@ -577,7 +539,6 @@
                             </div>
                             <span class="text-xs px-2.5 py-1 rounded-full font-semibold border ${statusClass(r.status)}">${r.status}</span>
                         </div>
-                        
                         <p class="text-xs text-slate-600 dark:text-slate-400"><b>Обидчик:</b> ${r.bully}</p>
                         <p class="text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-600">${r.desc}</p>
                         
@@ -599,14 +560,11 @@
                         <div class="pt-1 space-y-3">
                             <div>
                                 <label class="block text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400 mb-1">💬 Ответ ученику</label>
-                                
-                                <!-- БЫСТРЫЕ ОТВЕТЫ -->
                                 <div class="flex flex-wrap gap-1.5 mb-2">
                                     <button onclick="applyQuickReply(${r.id}, 'Здравствуйте. Я получил(а) вашу жалобу, разбираюсь в ситуации.')" class="text-[10px] bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-md hover:bg-slate-200 transition">Принято</button>
                                     <button onclick="applyQuickReply(${r.id}, 'Жду тебя в своем кабинете на большой перемене.')" class="text-[10px] bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-md hover:bg-slate-200 transition">Жду в кабинете</button>
                                     <button onclick="applyQuickReply(${r.id}, 'Спасибо за доверие. Я свяжусь с твоим классным руководителем.')" class="text-[10px] bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-md hover:bg-slate-200 transition">Свяжусь с учителем</button>
                                 </div>
-
                                 <div class="flex flex-col sm:flex-row gap-2">
                                     <textarea id="reply-${r.id}" rows="1" placeholder="Например: Жду тебя завтра в 14:00..." class="w-full px-3 py-2 bg-emerald-50 dark:bg-slate-800 border border-emerald-200 dark:border-slate-600 rounded-lg text-xs text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500">${r.replyToStudent || ''}</textarea>
                                     <button onclick="saveReply(${r.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">📤 Ответить</button>
