@@ -6,7 +6,6 @@
     <title>SafeSchool Казахстан — Служба доверия</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Включаем поддержку темной темы в Tailwind
         tailwind.config = { darkMode: 'class' }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -29,7 +28,6 @@
             </div>
             
             <div class="flex items-center space-x-2">
-                <!-- Кнопка переключения темы -->
                 <button onclick="toggleTheme()" class="text-sm p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 transition">
                     <span id="themeIcon">🌙</span>
                 </button>
@@ -165,20 +163,20 @@
             </div>
 
             <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
-                <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
-                    <h3 class="font-bold text-slate-900 dark:text-white">Журнал обращений</h3>
-                    
-                    <div class="flex flex-wrap gap-2 items-center">
-                        <!-- КНОПКА СКАЧИВАНИЯ -->
-                        <button onclick="downloadCSV()" class="text-[11px] bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-700 transition flex items-center gap-1">
-                            📥 Скачать Excel
-                        </button>
-
+                <div class="flex flex-col gap-3 mb-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <h3 class="font-bold text-slate-900 dark:text-white">Журнал обращений</h3>
+                        
                         <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold bg-slate-100 dark:bg-slate-700 p-1 rounded-xl">
                             <button onclick="setFilter('active')" id="filter-active" class="bg-white dark:bg-slate-600 shadow-sm text-slate-800 dark:text-white px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-500 transition">🔴 Активные</button>
                             <button onclick="setFilter('resolved')" id="filter-resolved" class="text-slate-500 dark:text-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition">🟢 Решённые</button>
                             <button onclick="setFilter('all')" id="filter-all" class="text-slate-500 dark:text-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition">⚪ Все</button>
                         </div>
+                    </div>
+                    
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+                        <input type="text" id="searchInput" oninput="renderReports()" placeholder="Поиск по имени, классу или обидчику..." class="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 dark:text-white transition">
                     </div>
                 </div>
                 
@@ -223,7 +221,6 @@
         const html = document.documentElement;
         const themeIcon = document.getElementById('themeIcon');
         
-        // Проверяем сохраненную тему при загрузке
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             html.classList.add('dark');
             themeIcon.innerText = '☀️';
@@ -244,7 +241,7 @@
             }
         }
 
-        // --- НОВЫЙ ПРИЯТНЫЙ ЗВУК (Мелодия из 3 нот) ---
+        // --- ЗВУК ---
         let audioCtx;
         document.body.addEventListener('click', function unlockAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -255,52 +252,22 @@
             if (!audioCtx) return; 
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
-            const notes = [523.25, 659.25, 783.99]; // Ноты До, Ми, Соль (приятный аккорд)
+            const notes = [523.25, 659.25, 783.99]; 
             notes.forEach((freq, index) => {
                 setTimeout(() => {
                     const oscillator = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
-                    
-                    oscillator.type = 'sine'; // Мягкий звук (вместо резкого квадрата)
+                    oscillator.type = 'sine'; 
                     oscillator.frequency.value = freq;
-                    
                     gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-                    gainNode.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.05); // Плавное нарастание
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4); // Плавное затухание
-                    
+                    gainNode.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.05); 
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4); 
                     oscillator.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
-                    
                     oscillator.start();
                     oscillator.stop(audioCtx.currentTime + 0.4);
-                }, index * 150); // Небольшая задержка между нотами
+                }, index * 150); 
             });
-        }
-
-        // --- СКАЧИВАНИЕ В EXCEL (CSV) ---
-        function downloadCSV() {
-            if (reports.length === 0) {
-                alert("Нет данных для скачивания.");
-                return;
-            }
-
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM для правильного отображения кириллицы в Excel
-            csvContent += "Дата;Имя;Класс;Тип;Обидчик;Описание;Статус;Заметка психолога\n";
-
-            reports.forEach(r => {
-                const cleanDesc = r.desc ? r.desc.replace(/"/g, '""') : '';
-                const cleanComment = r.comment ? r.comment.replace(/"/g, '""') : '';
-                const row = `"${r.date}";"${r.name}";"${r.class}";"${r.category}";"${r.bully}";"${cleanDesc}";"${r.status}";"${cleanComment}"`;
-                csvContent += row + "\n";
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `SafeSchool_Отчет_${new Date().toLocaleDateString('ru-RU')}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
         }
 
         function toggleTips() {
@@ -429,7 +396,9 @@
                 desc: document.getElementById('myDesc').value,
                 status: "Новое",
                 date: new Date().toLocaleDateString('ru-RU'),
-                comment: ""
+                comment: "",
+                urgent: false,
+                meetingTime: "" // НОВОЕ ПОЛЕ: Время встречи
             };
             reports.unshift(newReport); 
             renderReports(); 
@@ -451,6 +420,28 @@
                 report.status = newStatus;
                 renderReports(); 
                 saveData(); 
+            }
+        }
+
+        function toggleUrgent(id) {
+            const report = reports.find(r => r.id === id);
+            if (report) {
+                report.urgent = !report.urgent;
+                renderReports();
+                saveData();
+            }
+        }
+
+        // СОХРАНЕНИЕ ВРЕМЕНИ ВСТРЕЧИ ИЗ КАЛЕНДАРЯ
+        function saveMeetingTime(id) {
+            const timeInput = document.getElementById(`meeting-${id}`).value;
+            const report = reports.find(r => r.id === id);
+            if (report) {
+                report.meetingTime = timeInput;
+                report.status = 'Встреча'; // Автоматически ставим статус "Встреча"
+                alert('✅ Время встречи назначено!');
+                renderReports();
+                saveData();
             }
         }
 
@@ -481,6 +472,13 @@
             return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800';
         }
 
+        // Красивое форматирование даты из календаря
+        function formatMeetingTime(datetimeStr) {
+            if (!datetimeStr) return '';
+            const date = new Date(datetimeStr);
+            return date.toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+
         function renderReports() {
             const listContainer = document.getElementById('reportsList');
             document.getElementById('statTotal').innerText = reports.length;
@@ -494,14 +492,32 @@
                 filtered = reports;
             }
 
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            if (searchText) {
+                filtered = filtered.filter(r => 
+                    (r.name && r.name.toLowerCase().includes(searchText)) ||
+                    (r.class && r.class.toLowerCase().includes(searchText)) ||
+                    (r.bully && r.bully.toLowerCase().includes(searchText))
+                );
+            }
+
+            filtered.sort((a, b) => {
+                if (a.urgent && !b.urgent) return -1;
+                if (!a.urgent && b.urgent) return 1;
+                return b.id - a.id;
+            });
+
             if (filtered.length === 0) {
-                let msg = "Обращений нет.";
+                let msg = "Обращений не найдено.";
                 if (currentFilter === 'active') msg = "Нет активных обращений. Всё решено! 🎉";
                 if (currentFilter === 'resolved') msg = "В архиве пока нет решённых дел.";
                 listContainer.innerHTML = `<p class="text-xs text-slate-400 dark:text-slate-500 text-center py-6">${msg}</p>`;
             } else {
                 listContainer.innerHTML = filtered.map(r => `
-                    <div class="p-4 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl space-y-3 shadow-sm transition-colors">
+                    <div class="p-4 ${r.urgent ? 'bg-rose-50 border-rose-300 dark:bg-rose-900/20 dark:border-rose-700' : 'bg-slate-50 border-slate-200 dark:bg-slate-700 dark:border-slate-600'} border rounded-xl space-y-3 shadow-sm transition-colors relative">
+                        
+                        ${r.urgent ? '<span class="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md animate-pulse">🔥 СРОЧНО</span>' : ''}
+
                         <div class="flex items-center justify-between flex-wrap gap-2">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class="text-sm font-bold text-slate-900 dark:text-white">${r.name}</span>
@@ -515,12 +531,23 @@
                         <p class="text-xs text-slate-600 dark:text-slate-400"><b>Обидчик:</b> ${r.bully}</p>
                         <p class="text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-600">${r.desc}</p>
                         
+                        <!-- БЛОК С КАЛЕНДАРЕМ -->
+                        <div class="pt-2 pb-2">
+                            ${r.status === 'Встреча' && r.meetingTime ? `<div class="mb-2 text-xs font-bold text-purple-700 dark:text-purple-400">📅 Назначено на: ${formatMeetingTime(r.meetingTime)}</div>` : ''}
+                            <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                                <input type="datetime-local" id="meeting-${r.id}" value="${r.meetingTime || ''}" class="bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none">
+                                <button onclick="saveMeetingTime(${r.id})" class="bg-purple-500 hover:bg-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap">📅 Назначить встречу</button>
+                            </div>
+                        </div>
+
                         <div class="flex items-center flex-wrap gap-2 pt-1 border-b border-slate-200 dark:border-slate-600 pb-3">
+                            <button onclick="toggleUrgent(${r.id})" class="text-[11px] ${r.urgent ? 'bg-rose-600 text-white border-rose-700' : 'bg-white dark:bg-slate-600 border-slate-300 dark:border-slate-500 text-rose-600 dark:text-rose-400'} border px-2.5 py-1 rounded-lg hover:opacity-80 font-bold transition">
+                                🔥 ${r.urgent ? 'Срочно!' : 'Срочно?'}
+                            </button>
+
                             <button onclick="updateStatus(${r.id}, 'Новое')" class="text-[11px] bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-200 px-2.5 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-500 font-medium">🆕 Новое</button>
                             <button onclick="updateStatus(${r.id}, 'В работе')" class="text-[11px] bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-800 px-2.5 py-1 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/50 font-medium">⚙️ В работу</button>
-                            <button onclick="updateStatus(${r.id}, 'Встреча')" class="text-[11px] bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-800 px-2.5 py-1 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 font-medium">📅 Встреча</button>
                             <button onclick="updateStatus(${r.id}, 'Решено')" class="text-[11px] bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/50 font-medium">✅ Решено</button>
-                            <button onclick="updateStatus(${r.id}, 'Шутка / Ложный')" class="text-[11px] bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-300 dark:border-rose-800 px-2.5 py-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-900/50 font-medium">⚠️ Ложный</button>
                             
                             <button onclick="deleteReport(${r.id})" class="text-[11px] bg-red-600 text-white border border-red-700 px-2.5 py-1 rounded-lg hover:bg-red-700 font-medium ml-auto transition">🗑️ Удалить</button>
                         </div>
@@ -528,7 +555,7 @@
                         <div class="pt-1">
                             <label class="block text-[10px] font-bold uppercase text-indigo-500 dark:text-indigo-400 mb-1">📝 Заметка психолога</label>
                             <div class="flex flex-col sm:flex-row gap-2">
-                                <textarea id="comment-${r.id}" rows="1" placeholder="Например: Встреча в 14:00..." class="w-full px-3 py-2 bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-600 rounded-lg text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-400">${r.comment || ''}</textarea>
+                                <textarea id="comment-${r.id}" rows="1" placeholder="Например: Ребенок боится идти один..." class="w-full px-3 py-2 bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-600 rounded-lg text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-400">${r.comment || ''}</textarea>
                                 <button onclick="saveComment(${r.id})" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">💾 Сохранить</button>
                             </div>
                         </div>
