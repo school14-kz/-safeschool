@@ -48,9 +48,34 @@
         <!-- СТРАНИЦА УЧЕНИКА -->
         <div id="studentView" class="space-y-5">
             
+            <!-- БЛОК МОИХ ОБРАЩЕНИЙ (Появляется только если ученик уже писал) -->
+            <div id="myTicketsSection" class="hidden bg-white dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-2xl p-5 shadow-sm transition-colors">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+                        <span>📌</span> Мои обращения
+                    </h2>
+                    <button onclick="clearMyTickets()" class="text-[10px] text-slate-400 hover:text-rose-500 transition">Очистить</button>
+                </div>
+                <div id="myTicketsList" class="space-y-3">
+                    <!-- Сюда будут выводиться карточки ученика -->
+                </div>
+            </div>
+
+            <!-- Кнопка проверки по коду (для тех, кто зашел с другого телефона) -->
+            <div class="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition" onclick="openStatusModal()">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">🔍</span>
+                    <div>
+                        <h3 class="font-bold text-indigo-900 dark:text-indigo-300 text-sm">Зашли с другого устройства?</h3>
+                        <p class="text-xs text-indigo-600 dark:text-indigo-400">Проверьте статус по коду из 4 цифр</p>
+                    </div>
+                </div>
+                <span class="text-indigo-500 font-bold text-xl">&rarr;</span>
+            </div>
+
             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden transition-colors">
                 <button onclick="toggleTips()" class="w-full p-5 flex items-center justify-between text-left focus:outline-none">
-                    <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 font-semibold text-sm">
+                    <div class="flex items-center space-x-2 text-rose-600 dark:text-rose-400 font-semibold text-sm">
                         <span>📖</span>
                         <span>Памятка: Как противостоять травле</span>
                     </div>
@@ -185,7 +210,7 @@
         </div>
     </main>
 
-    <!-- Модалки -->
+    <!-- Модалка Входа -->
     <div id="loginModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full shadow-xl space-y-4 transition-colors">
             <h3 class="font-bold text-lg text-slate-900 dark:text-white">Вход для психолога</h3>
@@ -197,12 +222,36 @@
         </div>
     </div>
 
+    <!-- Модалка Успешной отправки -->
     <div id="successModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full shadow-xl text-center space-y-3 transition-colors">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full shadow-xl text-center space-y-4 transition-colors">
             <div class="text-4xl">✅</div>
-            <h3 class="font-bold text-lg text-slate-900 dark:text-white">Отправлено!</h3>
-            <p class="text-xs text-slate-600 dark:text-slate-300">Психолог уже видит ваше обращение.</p>
-            <button onclick="closeSuccessModal()" class="w-full bg-slate-900 dark:bg-slate-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-500 transition">Понятно</button>
+            <h3 class="font-bold text-lg text-slate-900 dark:text-white">Обращение отправлено!</h3>
+            <p class="text-xs text-slate-600 dark:text-slate-300">Психолог уже видит ваше сообщение. Теперь статус и ответ можно смотреть на главной странице в блоке <b>«📌 Мои обращения»</b>.</p>
+            
+            <div class="bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 p-3 rounded-xl mt-2">
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">Если зайдете с другого телефона, используйте код:</p>
+                <p id="successCode" class="text-xl font-black text-indigo-700 dark:text-indigo-400 tracking-widest mt-1"></p>
+            </div>
+
+            <button onclick="closeSuccessModal()" class="w-full bg-slate-900 dark:bg-slate-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-500 transition mt-2">Понятно</button>
+        </div>
+    </div>
+
+    <!-- Модалка Проверки статуса по коду -->
+    <div id="statusModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full shadow-xl space-y-4 transition-colors">
+            <h3 class="font-bold text-lg text-slate-900 dark:text-white">Поиск по коду</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Введите 4-значный код обращения, если вы зашли с другого устройства.</p>
+            
+            <input type="number" id="statusCodeInput" placeholder="Например: 4821" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-center text-lg font-bold tracking-widest text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+            
+            <div id="statusResult" class="hidden bg-slate-50 dark:bg-slate-700 p-4 rounded-xl border border-slate-200 dark:border-slate-600 space-y-2"></div>
+
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeStatusModal()" class="flex-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition">Закрыть</button>
+                <button onclick="checkStatusCode()" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition">Найти</button>
+            </div>
         </div>
     </div>
 
@@ -216,6 +265,9 @@
         let currentFilter = 'active';
         let lastCount = 0; 
         const PSYCHOLOGIST_PASSWORD = 'bagdagul';
+        
+        // МАССИВ ДЛЯ ЗАПОМИНАНИЯ КОДОВ НА ТЕЛЕФОНЕ УЧЕНИКА
+        let myTicketCodes = JSON.parse(localStorage.getItem('safe_school_my_tickets')) || [];
 
         // --- ТЕМНАЯ ТЕМА ---
         const html = document.documentElement;
@@ -241,7 +293,7 @@
             }
         }
 
-        // --- НОВАЯ МЕЛОДИЯ (Только для психолога) ---
+        // --- ЗВУК ---
         let audioCtx;
         document.body.addEventListener('click', function unlockAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -251,29 +303,130 @@
         function playNotificationSound() {
             if (!audioCtx) return; 
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            
-            // Новая мелодия: D5, A5, C6 (Красивый, современный звук)
             const notes = [587.33, 880.00, 1046.50]; 
             notes.forEach((freq, index) => {
                 setTimeout(() => {
                     const oscillator = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
-                    oscillator.type = 'triangle'; // Мягкий и чистый звук
+                    oscillator.type = 'triangle'; 
                     oscillator.frequency.value = freq;
-                    
                     gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
                     gainNode.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 0.02); 
                     gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5); 
-                    
                     oscillator.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
-                    
                     oscillator.start();
                     oscillator.stop(audioCtx.currentTime + 0.5);
-                }, index * 120); // Быстрый перелив
+                }, index * 120); 
             });
         }
 
+        // --- МОДАЛКИ ---
+        function openLoginModal() { document.getElementById('loginModal').classList.remove('hidden'); document.getElementById('loginModal').classList.add('flex'); }
+        function closeLoginModal() { document.getElementById('loginModal').classList.add('hidden'); document.getElementById('loginModal').classList.remove('flex'); document.getElementById('loginPassword').value = ''; }
+        
+        function closeSuccessModal() { 
+            document.getElementById('successModal').classList.add('hidden'); 
+            document.getElementById('successModal').classList.remove('flex'); 
+            // Принудительно обновляем данные, чтобы ученик сразу увидел свой статус в "Моих обращениях"
+            loadData(); 
+        }
+        
+        function openStatusModal() { 
+            document.getElementById('statusModal').classList.remove('hidden'); 
+            document.getElementById('statusModal').classList.add('flex'); 
+            document.getElementById('statusResult').classList.add('hidden');
+            document.getElementById('statusCodeInput').value = '';
+        }
+        function closeStatusModal() { document.getElementById('statusModal').classList.add('hidden'); document.getElementById('statusModal').classList.remove('flex'); }
+
+        // ОЧИСТКА ИСТОРИИ
+        function clearMyTickets() {
+            if(confirm('Очистить список ваших обращений на этом телефоне?')) {
+                myTicketCodes = [];
+                localStorage.setItem('safe_school_my_tickets', JSON.stringify(myTicketCodes));
+                renderMyTickets();
+            }
+        }
+
+        // ПРОВЕРКА СТАТУСА ПО КОДУ (РУЧНАЯ)
+        function checkStatusCode() {
+            const code = document.getElementById('statusCodeInput').value.trim();
+            const resultDiv = document.getElementById('statusResult');
+            
+            if (!code) { alert('Пожалуйста, введите код.'); return; }
+            const report = reports.find(r => r.ticketCode === parseInt(code));
+
+            if (!report) {
+                resultDiv.innerHTML = `<p class="text-rose-500 text-sm font-bold text-center">Обращение с таким кодом не найдено.</p>`;
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+            resultDiv.innerHTML = generateStudentTicketHTML(report);
+            resultDiv.classList.remove('hidden');
+        }
+
+        // ГЕНЕРАЦИЯ HTML ДЛЯ КАРТОЧКИ УЧЕНИКА
+        function generateStudentTicketHTML(report) {
+            let statusText = "На рассмотрении";
+            let statusColor = "text-amber-600 dark:text-amber-400";
+            if (report.status === 'В работе') { statusText = "Психолог работает над вопросом"; statusColor = "text-blue-600 dark:text-blue-400"; }
+            if (report.status === 'Встреча') { statusText = "Назначена встреча"; statusColor = "text-purple-600 dark:text-purple-400"; }
+            if (report.status === 'Решено') { statusText = "Вопрос решен"; statusColor = "text-emerald-600 dark:text-emerald-400"; }
+
+            let html = `
+                <div class="border-b border-slate-200 dark:border-slate-600 pb-2 mb-2 flex justify-between items-start">
+                    <div>
+                        <p class="text-[10px] uppercase text-slate-500 dark:text-slate-400">Статус:</p>
+                        <p class="text-xs font-bold ${statusColor}">${statusText}</p>
+                    </div>
+                    <span class="text-[10px] bg-slate-100 dark:bg-slate-600 px-2 py-1 rounded">${report.date}</span>
+                </div>
+            `;
+
+            if (report.meetingTime) {
+                html += `<p class="text-xs text-purple-600 dark:text-purple-400 font-bold mb-2">📅 Встреча: ${formatMeetingTime(report.meetingTime)}</p>`;
+            }
+
+            if (report.replyToStudent) {
+                html += `
+                    <div>
+                        <p class="text-[10px] uppercase text-slate-500 dark:text-slate-400 mb-1">Ответ психолога:</p>
+                        <p class="text-xs text-slate-800 dark:text-white bg-indigo-50 dark:bg-slate-800 p-2 rounded-lg">${report.replyToStudent}</p>
+                    </div>
+                `;
+            } else {
+                html += `<p class="text-[10px] text-slate-400 text-center italic mt-1">Ожидайте ответа психолога...</p>`;
+            }
+            return html;
+        }
+
+        // ОТРИСОВКА БЛОКА "МОИ ОБРАЩЕНИЯ" НА ГЛАВНОЙ
+        function renderMyTickets() {
+            const section = document.getElementById('myTicketsSection');
+            const list = document.getElementById('myTicketsList');
+            
+            // Находим в базе только те обращения, коды которых сохранены у ученика в телефоне
+            const myReports = reports.filter(r => myTicketCodes.includes(r.ticketCode));
+            
+            if (myReports.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            list.innerHTML = myReports.map(r => `
+                <div class="bg-emerald-50 dark:bg-slate-700/50 p-3 rounded-xl border border-emerald-100 dark:border-slate-600 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Обращение №${r.ticketCode}</span>
+                        <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">${r.category}</span>
+                    </div>
+                    ${generateStudentTicketHTML(r)}
+                </div>
+            `).join('');
+        }
+
+        // --- ОСТАЛЬНАЯ ЛОГИКА ПСИХОЛОГА И ДАННЫХ ---
         function toggleTips() {
             const content = document.getElementById('tipsContent');
             const icon = document.getElementById('tipsIcon');
@@ -312,7 +465,6 @@
                 
                 const data = await res.json();
                 if (data && data.posts) {
-                    // ЗВУК ТОЛЬКО ДЛЯ ПСИХОЛОГА
                     if (data.posts.length > lastCount && lastCount > 0) {
                         if (localStorage.getItem('safe_school_psychologist') === 'true') {
                             playNotificationSound();
@@ -324,6 +476,7 @@
                     if (JSON.stringify(reports) !== JSON.stringify(data.posts)) {
                         reports = data.posts;
                         renderReports();
+                        renderMyTickets(); // Обновляем карточки ученика
                     }
                 } else {
                     await saveData();
@@ -346,17 +499,6 @@
                 console.error("Ошибка сохранения:", e);
                 alert("Ошибка соединения с базой.");
             }
-        }
-
-        function openLoginModal() {
-            document.getElementById('loginModal').classList.remove('hidden');
-            document.getElementById('loginModal').classList.add('flex');
-            document.getElementById('newBadge').classList.add('hidden'); 
-        }
-        function closeLoginModal() {
-            document.getElementById('loginModal').classList.add('hidden');
-            document.getElementById('loginModal').classList.remove('flex');
-            document.getElementById('loginPassword').value = '';
         }
 
         function checkPassword() {
@@ -392,8 +534,11 @@
 
         async function submitReport(e) {
             e.preventDefault();
+            const ticketCode = Math.floor(1000 + Math.random() * 9000);
+
             const newReport = {
                 id: Date.now(),
+                ticketCode: ticketCode,
                 name: document.getElementById('myName').value,
                 class: document.getElementById('myClass').value,
                 category: document.getElementById('myCategory').value,
@@ -402,28 +547,30 @@
                 status: "Новое",
                 date: new Date().toLocaleDateString('ru-RU'),
                 comment: "",
+                replyToStudent: "",
                 meetingTime: ""
             };
             reports.unshift(newReport); 
+            
+            // СОХРАНЯЕМ КОД В БРАУЗЕР УЧЕНИКА
+            myTicketCodes.push(ticketCode);
+            localStorage.setItem('safe_school_my_tickets', JSON.stringify(myTicketCodes));
+            
             renderReports(); 
+            renderMyTickets(); // Сразу показываем ученику его обращение
             await saveData(); 
             
             document.getElementById('reportForm').reset();
+            document.getElementById('successCode').innerText = ticketCode;
             document.getElementById('successModal').classList.remove('hidden');
             document.getElementById('successModal').classList.add('flex');
-        }
-
-        function closeSuccessModal() {
-            document.getElementById('successModal').classList.add('hidden');
-            document.getElementById('successModal').classList.remove('flex');
         }
 
         function updateStatus(id, newStatus) {
             const report = reports.find(r => r.id === id);
             if (report) {
                 report.status = newStatus;
-                renderReports(); 
-                saveData(); 
+                renderReports(); renderMyTickets(); saveData(); 
             }
         }
 
@@ -434,16 +581,14 @@
                 report.meetingTime = timeInput;
                 report.status = 'Встреча'; 
                 alert('✅ Время встречи назначено!');
-                renderReports();
-                saveData();
+                renderReports(); renderMyTickets(); saveData();
             }
         }
 
         async function deleteReport(id) {
             if (confirm('⚠️ Вы уверены, что хотите БЕЗВОЗВРАТНО удалить эту заявку?')) {
                 reports = reports.filter(r => r.id !== id); 
-                renderReports(); 
-                await saveData(); 
+                renderReports(); renderMyTickets(); await saveData(); 
                 lastCount = reports.length; 
             }
         }
@@ -454,6 +599,17 @@
             if (report) {
                 report.comment = text;
                 alert('✅ Заметка сохранена!');
+                saveData();
+            }
+        }
+
+        function saveReply(id) {
+            const text = document.getElementById(`reply-${id}`).value.trim();
+            const report = reports.find(r => r.id === id);
+            if (report) {
+                report.replyToStudent = text;
+                alert('✅ Ответ отправлен ученику!');
+                renderMyTickets(); 
                 saveData();
             }
         }
@@ -494,7 +650,6 @@
                 );
             }
 
-            // Сортировка: новые сверху (без учета "Срочно")
             filtered.sort((a, b) => b.id - a.id);
 
             if (filtered.length === 0) {
@@ -510,7 +665,7 @@
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class="text-sm font-bold text-slate-900 dark:text-white">${r.name}</span>
                                 <span class="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-600 px-2 py-0.5 rounded">${r.class}</span>
-                                <span class="text-[10px] text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-600 px-2 py-0.5 rounded font-semibold">${r.category || 'Другое'}</span>
+                                <span class="text-[10px] text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-600 px-2 py-0.5 rounded font-semibold">Код: ${r.ticketCode}</span>
                                 <span class="text-[10px] text-slate-400 dark:text-slate-500">${r.date}</span>
                             </div>
                             <span class="text-xs px-2.5 py-1 rounded-full font-semibold border ${statusClass(r.status)}">${r.status}</span>
@@ -519,7 +674,6 @@
                         <p class="text-xs text-slate-600 dark:text-slate-400"><b>Обидчик:</b> ${r.bully}</p>
                         <p class="text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-600">${r.desc}</p>
                         
-                        <!-- БЛОК С КАЛЕНДАРЕМ -->
                         <div class="pt-2 pb-2">
                             ${r.status === 'Встреча' && r.meetingTime ? `<div class="mb-2 text-xs font-bold text-purple-700 dark:text-purple-400">📅 Назначено на: ${formatMeetingTime(r.meetingTime)}</div>` : ''}
                             <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
@@ -537,11 +691,21 @@
                             <button onclick="deleteReport(${r.id})" class="text-[11px] bg-red-600 text-white border border-red-700 px-2.5 py-1 rounded-lg hover:bg-red-700 font-medium ml-auto transition">🗑️ Удалить</button>
                         </div>
 
-                        <div class="pt-1">
-                            <label class="block text-[10px] font-bold uppercase text-indigo-500 dark:text-indigo-400 mb-1">📝 Заметка психолога</label>
-                            <div class="flex flex-col sm:flex-row gap-2">
-                                <textarea id="comment-${r.id}" rows="1" placeholder="Например: Встреча в 14:00..." class="w-full px-3 py-2 bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-600 rounded-lg text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-400">${r.comment || ''}</textarea>
-                                <button onclick="saveComment(${r.id})" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">💾 Сохранить</button>
+                        <div class="pt-1 space-y-3">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400 mb-1">💬 Ответ ученику (виден по коду)</label>
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <textarea id="reply-${r.id}" rows="1" placeholder="Например: Жду тебя завтра в 14:00..." class="w-full px-3 py-2 bg-emerald-50 dark:bg-slate-800 border border-emerald-200 dark:border-slate-600 rounded-lg text-xs text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500">${r.replyToStudent || ''}</textarea>
+                                    <button onclick="saveReply(${r.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">📤 Ответить</button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-indigo-500 dark:text-indigo-400 mb-1">📝 Заметка (только для психолога)</label>
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <textarea id="comment-${r.id}" rows="1" placeholder="Заметки для себя..." class="w-full px-3 py-2 bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-600 rounded-lg text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-400">${r.comment || ''}</textarea>
+                                    <button onclick="saveComment(${r.id})" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">💾 Сохранить</button>
+                                </div>
                             </div>
                         </div>
                     </div>
