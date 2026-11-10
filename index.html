@@ -1,30 +1,40 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeSchool Казахстан — Служба доверия</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Включаем поддержку темной темы в Tailwind
+        tailwind.config = { darkMode: 'class' }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s, color 0.3s; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 min-h-screen flex flex-col">
 
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm transition-colors">
         <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
             <div class="flex items-center space-x-3">
-                <div class="bg-white p-1 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center w-11 h-11 overflow-hidden">
+                <div class="bg-white dark:bg-slate-700 p-1 rounded-xl shadow-sm border border-slate-200 dark:border-slate-600 flex items-center justify-center w-11 h-11 overflow-hidden">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Emblem_of_Kazakhstan.svg/500px-Emblem_of_Kazakhstan.svg.png" alt="Герб" class="w-full h-full object-contain" onerror="this.style.display='none'; this.parentElement.innerHTML='🇰🇿';">
                 </div>
                 <div>
-                    <h1 class="font-bold text-slate-900 leading-tight">SafeSchool</h1>
-                    <p class="text-xs text-slate-500">Школьная служба доверия РК</p>
+                    <h1 class="font-bold text-slate-900 dark:text-white leading-tight">SafeSchool</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Школьная служба доверия РК</p>
                 </div>
             </div>
-            <div>
-                <button id="roleToggleBtn" onclick="openLoginModal()" class="relative text-xs bg-rose-50 text-rose-600 border border-rose-200 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-100 transition">
+            
+            <div class="flex items-center space-x-2">
+                <!-- Кнопка переключения темы -->
+                <button onclick="toggleTheme()" class="text-sm p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 transition">
+                    <span id="themeIcon">🌙</span>
+                </button>
+
+                <button id="roleToggleBtn" onclick="openLoginModal()" class="relative text-xs bg-rose-50 text-rose-600 border border-rose-200 dark:bg-slate-700 dark:text-rose-400 dark:border-slate-600 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-slate-600 transition">
                     👩‍⚕️ Психолог
                     <span id="newBadge" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
@@ -37,18 +47,19 @@
 
     <main class="flex-1 max-w-xl md:max-w-4xl mx-auto w-full p-4 md:py-8">
 
+        <!-- СТРАНИЦА УЧЕНИКА -->
         <div id="studentView" class="space-y-5">
             
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden transition-colors">
                 <button onclick="toggleTips()" class="w-full p-5 flex items-center justify-between text-left focus:outline-none">
-                    <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-sm">
+                    <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 font-semibold text-sm">
                         <span>📖</span>
                         <span>Памятка: Как противостоять травле</span>
                     </div>
                     <span id="tipsIcon" class="text-slate-400 transition-transform">▼</span>
                 </button>
-                <div id="tipsContent" class="hidden p-5 pt-0 text-sm text-slate-600 space-y-3 border-t border-slate-100">
-                    <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100">
+                <div id="tipsContent" class="hidden p-5 pt-0 text-sm text-slate-600 dark:text-slate-300 space-y-3 border-t border-slate-100 dark:border-slate-700">
+                    <div class="bg-indigo-50 dark:bg-slate-700 p-3 rounded-xl border border-indigo-100 dark:border-slate-600">
                         <b>Что делать при буллинге:</b>
                         <ul class="list-disc pl-4 mt-1 space-y-1 text-xs">
                             <li>Не отвечай агрессией. Спокойствие — твоя защита.</li>
@@ -56,7 +67,7 @@
                             <li>Сообщи взрослым (родителям, классному руководителю, психологу).</li>
                         </ul>
                     </div>
-                    <div class="bg-purple-50 p-3 rounded-xl border border-purple-100">
+                    <div class="bg-purple-50 dark:bg-slate-700 p-3 rounded-xl border border-purple-100 dark:border-slate-600">
                         <b>Что делать при кибербуллинге (в сети):</b>
                         <ul class="list-disc pl-4 mt-1 space-y-1 text-xs">
                             <li><b>Сделай скриншоты!</b> Это главное доказательство.</li>
@@ -67,41 +78,41 @@
                 </div>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div class="flex items-center space-x-2 text-rose-600 font-semibold text-sm">
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3 transition-colors">
+                <div class="flex items-center space-x-2 text-rose-600 dark:text-rose-400 font-semibold text-sm">
                     <span>🔒</span>
                     <span>Полная конфиденциальность</span>
                 </div>
-                <p class="text-sm text-slate-600 leading-relaxed">
+                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                     Ваше имя никто не видит, кроме школьного психолога. Ни одноклассники, ни обидчики не узнают, кто отправил жалобу.
                 </p>
-                <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-start space-x-2 text-xs text-amber-800">
+                <div class="bg-amber-50 dark:bg-slate-700 border border-amber-200 dark:border-slate-600 p-3 rounded-xl flex items-start space-x-2 text-xs text-amber-800 dark:text-amber-300">
                     <span class="text-base">⚠️</span>
                     <span><b>Внимание: Не пишите в шутку!</b> Ложные доносы караются школьным уставом.</span>
                 </div>
             </div>
 
-            <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <h2 class="text-lg font-bold text-slate-900 mb-4">Сообщить о ситуации</h2>
+            <div class="bg-white dark:bg-slate-800 p-5 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Сообщить о ситуации</h2>
                 <form id="reportForm" onsubmit="submitReport(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Ваше имя и фамилия</label>
-                        <input type="text" id="myName" required placeholder="Например: Алишер Каримов" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition">
-                        <p class="text-[11px] text-rose-500 mt-1">🔒 Видит только психолог!</p>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Ваше имя и фамилия</label>
+                        <input type="text" id="myName" required placeholder="Например: Алишер Каримов" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition">
+                        <p class="text-[11px] text-rose-500 dark:text-rose-400 mt-1">🔒 Видит только психолог!</p>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Ваш класс</label>
-                            <input type="text" id="myClass" required placeholder="8 «Б»" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition">
+                            <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Ваш класс</label>
+                            <input type="text" id="myClass" required placeholder="8 «Б»" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Кто обижает</label>
-                            <input type="text" id="bullyName" required placeholder="Имя или группа" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition">
+                            <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Кто обижает</label>
+                            <input type="text" id="bullyName" required placeholder="Имя или группа" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Тип проблемы</label>
-                        <select id="myCategory" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition">
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Тип проблемы</label>
+                        <select id="myCategory" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition">
                             <option value="Оскорбления / Слова">Оскорбления / Слова</option>
                             <option value="Физическое насилие">Физическое насилие</option>
                             <option value="Кибербуллинг (в сети)">Кибербуллинг (в сети)</option>
@@ -111,10 +122,10 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Что произошло?</label>
-                        <textarea id="myDesc" rows="4" required placeholder="Опишите ситуацию..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition"></textarea>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Что произошло?</label>
+                        <textarea id="myDesc" rows="4" required placeholder="Опишите ситуацию..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition"></textarea>
                     </div>
-                    <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md shadow-rose-200 transition">
+                    <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md shadow-rose-200 dark:shadow-none transition">
                         Отправить психологу конфиденциально
                     </button>
                 </form>
@@ -132,57 +143,68 @@
             </div>
         </div>
 
+        <!-- КАБИНЕТ ПСИХОЛОГА -->
         <div id="psychologistView" class="hidden space-y-6">
-            <div class="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-900">Кабинет психолога</h2>
-                    <p class="text-sm text-slate-500">Журнал конфиденциальных обращений</p>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">Кабинет психолога</h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Журнал конфиденциальных обращений</p>
                 </div>
-                <button onclick="logoutPsychologist()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition">Выйти</button>
+                <button onclick="logoutPsychologist()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-xs font-semibold px-4 py-2 rounded-xl transition">Выйти</button>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <span class="text-xs font-semibold uppercase text-slate-400">Всего заявок</span>
-                    <p id="statTotal" class="text-2xl font-bold text-slate-900 mt-1">0</p>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                    <span class="text-xs font-semibold uppercase text-slate-400 dark:text-slate-500">Всего заявок</span>
+                    <p id="statTotal" class="text-2xl font-bold text-slate-900 dark:text-white mt-1">0</p>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <span class="text-xs font-semibold uppercase text-amber-500">Частый обидчик</span>
-                    <p id="statBullies" class="text-sm font-bold text-slate-800 mt-2 truncate">—</p>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                    <span class="text-xs font-semibold uppercase text-amber-500 dark:text-amber-400">Частый обидчик</span>
+                    <p id="statBullies" class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-2 truncate">—</p>
                 </div>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
-                    <h3 class="font-bold text-slate-900">Журнал обращений</h3>
-                    <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold bg-slate-100 p-1 rounded-xl">
-                        <button onclick="setFilter('active')" id="filter-active" class="bg-white shadow-sm text-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 transition">🔴 Активные</button>
-                        <button onclick="setFilter('resolved')" id="filter-resolved" class="text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition">🟢 Решённые</button>
-                        <button onclick="setFilter('all')" id="filter-all" class="text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition">⚪ Все</button>
+                    <h3 class="font-bold text-slate-900 dark:text-white">Журнал обращений</h3>
+                    
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <!-- КНОПКА СКАЧИВАНИЯ -->
+                        <button onclick="downloadCSV()" class="text-[11px] bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-700 transition flex items-center gap-1">
+                            📥 Скачать Excel
+                        </button>
+
+                        <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold bg-slate-100 dark:bg-slate-700 p-1 rounded-xl">
+                            <button onclick="setFilter('active')" id="filter-active" class="bg-white dark:bg-slate-600 shadow-sm text-slate-800 dark:text-white px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-500 transition">🔴 Активные</button>
+                            <button onclick="setFilter('resolved')" id="filter-resolved" class="text-slate-500 dark:text-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition">🟢 Решённые</button>
+                            <button onclick="setFilter('all')" id="filter-all" class="text-slate-500 dark:text-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition">⚪ Все</button>
+                        </div>
                     </div>
                 </div>
+                
                 <div id="reportsList" class="space-y-4"><p class="text-xs text-slate-400 text-center py-6">Загрузка данных...</p></div>
             </div>
         </div>
     </main>
 
+    <!-- Модалки -->
     <div id="loginModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white p-6 rounded-2xl max-w-sm w-full shadow-xl space-y-4">
-            <h3 class="font-bold text-lg text-slate-900">Вход для психолога</h3>
-            <input type="password" id="loginPassword" placeholder="Пароль..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full shadow-xl space-y-4 transition-colors">
+            <h3 class="font-bold text-lg text-slate-900 dark:text-white">Вход для психолога</h3>
+            <input type="password" id="loginPassword" placeholder="Пароль..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500">
             <div class="flex space-x-2">
-                <button onclick="closeLoginModal()" class="flex-1 bg-slate-100 text-slate-700 py-2.5 rounded-xl text-sm font-semibold">Отмена</button>
-                <button onclick="checkPassword()" class="flex-1 bg-rose-500 text-white py-2.5 rounded-xl text-sm font-semibold">Войти</button>
+                <button onclick="closeLoginModal()" class="flex-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-600 transition">Отмена</button>
+                <button onclick="checkPassword()" class="flex-1 bg-rose-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-rose-600 transition">Войти</button>
             </div>
         </div>
     </div>
 
     <div id="successModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white p-6 rounded-2xl max-w-sm w-full shadow-xl text-center space-y-3">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full shadow-xl text-center space-y-3 transition-colors">
             <div class="text-4xl">✅</div>
-            <h3 class="font-bold text-lg text-slate-900">Отправлено!</h3>
-            <p class="text-xs text-slate-600">Психолог уже видит ваше обращение.</p>
-            <button onclick="closeSuccessModal()" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-sm font-semibold">Понятно</button>
+            <h3 class="font-bold text-lg text-slate-900 dark:text-white">Отправлено!</h3>
+            <p class="text-xs text-slate-600 dark:text-slate-300">Психолог уже видит ваше обращение.</p>
+            <button onclick="closeSuccessModal()" class="w-full bg-slate-900 dark:bg-slate-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-800 dark:hover:bg-slate-500 transition">Понятно</button>
         </div>
     </div>
 
@@ -197,7 +219,32 @@
         let lastCount = 0; 
         const PSYCHOLOGIST_PASSWORD = 'bagdagul';
 
-        // --- СИСТЕМА ЗВУКА ---
+        // --- ТЕМНАЯ ТЕМА ---
+        const html = document.documentElement;
+        const themeIcon = document.getElementById('themeIcon');
+        
+        // Проверяем сохраненную тему при загрузке
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+            themeIcon.innerText = '☀️';
+        } else {
+            html.classList.remove('dark');
+            themeIcon.innerText = '🌙';
+        }
+
+        function toggleTheme() {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeIcon.innerText = '🌙';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.innerText = '☀️';
+            }
+        }
+
+        // --- НОВЫЙ ПРИЯТНЫЙ ЗВУК (Мелодия из 3 нот) ---
         let audioCtx;
         document.body.addEventListener('click', function unlockAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -208,22 +255,53 @@
             if (!audioCtx) return; 
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
-            for(let i=0; i<2; i++) {
+            const notes = [523.25, 659.25, 783.99]; // Ноты До, Ми, Соль (приятный аккорд)
+            notes.forEach((freq, index) => {
                 setTimeout(() => {
                     const oscillator = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
-                    oscillator.type = 'square'; 
-                    oscillator.frequency.value = 880; 
-                    gainNode.gain.setValueAtTime(1, audioCtx.currentTime); 
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                    
+                    oscillator.type = 'sine'; // Мягкий звук (вместо резкого квадрата)
+                    oscillator.frequency.value = freq;
+                    
+                    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.05); // Плавное нарастание
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4); // Плавное затухание
+                    
                     oscillator.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
+                    
                     oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + 0.5);
-                }, i * 600); 
-            }
+                    oscillator.stop(audioCtx.currentTime + 0.4);
+                }, index * 150); // Небольшая задержка между нотами
+            });
         }
-        // ---------------------
+
+        // --- СКАЧИВАНИЕ В EXCEL (CSV) ---
+        function downloadCSV() {
+            if (reports.length === 0) {
+                alert("Нет данных для скачивания.");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM для правильного отображения кириллицы в Excel
+            csvContent += "Дата;Имя;Класс;Тип;Обидчик;Описание;Статус;Заметка психолога\n";
+
+            reports.forEach(r => {
+                const cleanDesc = r.desc ? r.desc.replace(/"/g, '""') : '';
+                const cleanComment = r.comment ? r.comment.replace(/"/g, '""') : '';
+                const row = `"${r.date}";"${r.name}";"${r.class}";"${r.category}";"${r.bully}";"${cleanDesc}";"${r.status}";"${cleanComment}"`;
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `SafeSchool_Отчет_${new Date().toLocaleDateString('ru-RU')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
 
         function toggleTips() {
             const content = document.getElementById('tipsContent');
@@ -239,10 +317,13 @@
 
         function setFilter(filter) {
             currentFilter = filter;
-            document.getElementById('filter-active').className = 'text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition';
-            document.getElementById('filter-resolved').className = 'text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition';
-            document.getElementById('filter-all').className = 'text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition';
-            document.getElementById(`filter-${filter}`).className = 'bg-white shadow-sm text-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 transition';
+            const btnBase = 'text-slate-500 dark:text-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition';
+            const btnActive = 'bg-white dark:bg-slate-600 shadow-sm text-slate-800 dark:text-white px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-500 transition';
+            
+            document.getElementById('filter-active').className = btnBase;
+            document.getElementById('filter-resolved').className = btnBase;
+            document.getElementById('filter-all').className = btnBase;
+            document.getElementById(`filter-${filter}`).className = btnActive;
             renderReports();
         }
 
@@ -260,7 +341,6 @@
                 
                 const data = await res.json();
                 if (data && data.posts) {
-                    // ВАЖНО: Звук и бейдж только для ПСИХОЛОГА
                     if (data.posts.length > lastCount && lastCount > 0) {
                         if (localStorage.getItem('safe_school_psychologist') === 'true') {
                             playNotificationSound();
@@ -394,11 +474,11 @@
         }
 
         function statusClass(status) {
-            if (status === 'Шутка / Ложный') return 'bg-red-100 text-red-700 border-red-200';
-            if (status === 'В работе') return 'bg-amber-100 text-amber-700 border-amber-200';
-            if (status === 'Решено') return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-            if (status === 'Встреча') return 'bg-purple-100 text-purple-700 border-purple-200';
-            return 'bg-blue-100 text-blue-700 border-blue-200';
+            if (status === 'Шутка / Ложный') return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
+            if (status === 'В работе') return 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800';
+            if (status === 'Решено') return 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800';
+            if (status === 'Встреча') return 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800';
+            return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800';
         }
 
         function renderReports() {
@@ -418,37 +498,37 @@
                 let msg = "Обращений нет.";
                 if (currentFilter === 'active') msg = "Нет активных обращений. Всё решено! 🎉";
                 if (currentFilter === 'resolved') msg = "В архиве пока нет решённых дел.";
-                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">${msg}</p>`;
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 dark:text-slate-500 text-center py-6">${msg}</p>`;
             } else {
                 listContainer.innerHTML = filtered.map(r => `
-                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 shadow-sm">
+                    <div class="p-4 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl space-y-3 shadow-sm transition-colors">
                         <div class="flex items-center justify-between flex-wrap gap-2">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span class="text-sm font-bold text-slate-900">${r.name}</span>
-                                <span class="text-[11px] text-slate-500 bg-slate-200 px-2 py-0.5 rounded">${r.class}</span>
-                                <span class="text-[10px] text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded font-semibold">${r.category || 'Другое'}</span>
-                                <span class="text-[10px] text-slate-400">${r.date}</span>
+                                <span class="text-sm font-bold text-slate-900 dark:text-white">${r.name}</span>
+                                <span class="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-600 px-2 py-0.5 rounded">${r.class}</span>
+                                <span class="text-[10px] text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-600 px-2 py-0.5 rounded font-semibold">${r.category || 'Другое'}</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500">${r.date}</span>
                             </div>
                             <span class="text-xs px-2.5 py-1 rounded-full font-semibold border ${statusClass(r.status)}">${r.status}</span>
                         </div>
                         
-                        <p class="text-xs text-slate-600"><b>Обидчик:</b> ${r.bully}</p>
-                        <p class="text-sm text-slate-800 bg-white p-3 rounded-lg border border-slate-200">${r.desc}</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-400"><b>Обидчик:</b> ${r.bully}</p>
+                        <p class="text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-600">${r.desc}</p>
                         
-                        <div class="flex items-center flex-wrap gap-2 pt-1 border-b border-slate-200 pb-3">
-                            <button onclick="updateStatus(${r.id}, 'Новое')" class="text-[11px] bg-white border border-slate-300 px-2.5 py-1 rounded-lg hover:bg-slate-100 font-medium">🆕 Новое</button>
-                            <button onclick="updateStatus(${r.id}, 'В работе')" class="text-[11px] bg-amber-50 text-amber-700 border border-amber-300 px-2.5 py-1 rounded-lg hover:bg-amber-100 font-medium">⚙️ В работу</button>
-                            <button onclick="updateStatus(${r.id}, 'Встреча')" class="text-[11px] bg-purple-50 text-purple-700 border border-purple-300 px-2.5 py-1 rounded-lg hover:bg-purple-100 font-medium">📅 Встреча</button>
-                            <button onclick="updateStatus(${r.id}, 'Решено')" class="text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-300 px-2.5 py-1 rounded-lg hover:bg-emerald-100 font-medium">✅ Решено</button>
-                            <button onclick="updateStatus(${r.id}, 'Шутка / Ложный')" class="text-[11px] bg-rose-50 text-rose-600 border border-rose-300 px-2.5 py-1 rounded-lg hover:bg-rose-100 font-medium">⚠️ Ложный</button>
+                        <div class="flex items-center flex-wrap gap-2 pt-1 border-b border-slate-200 dark:border-slate-600 pb-3">
+                            <button onclick="updateStatus(${r.id}, 'Новое')" class="text-[11px] bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-200 px-2.5 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-500 font-medium">🆕 Новое</button>
+                            <button onclick="updateStatus(${r.id}, 'В работе')" class="text-[11px] bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-800 px-2.5 py-1 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/50 font-medium">⚙️ В работу</button>
+                            <button onclick="updateStatus(${r.id}, 'Встреча')" class="text-[11px] bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-800 px-2.5 py-1 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 font-medium">📅 Встреча</button>
+                            <button onclick="updateStatus(${r.id}, 'Решено')" class="text-[11px] bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 px-2.5 py-1 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/50 font-medium">✅ Решено</button>
+                            <button onclick="updateStatus(${r.id}, 'Шутка / Ложный')" class="text-[11px] bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-300 dark:border-rose-800 px-2.5 py-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-900/50 font-medium">⚠️ Ложный</button>
                             
                             <button onclick="deleteReport(${r.id})" class="text-[11px] bg-red-600 text-white border border-red-700 px-2.5 py-1 rounded-lg hover:bg-red-700 font-medium ml-auto transition">🗑️ Удалить</button>
                         </div>
 
                         <div class="pt-1">
-                            <label class="block text-[10px] font-bold uppercase text-indigo-500 mb-1">📝 Заметка психолога</label>
+                            <label class="block text-[10px] font-bold uppercase text-indigo-500 dark:text-indigo-400 mb-1">📝 Заметка психолога</label>
                             <div class="flex flex-col sm:flex-row gap-2">
-                                <textarea id="comment-${r.id}" rows="1" placeholder="Например: Встреча в 14:00..." class="w-full px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg text-xs focus:outline-none focus:border-indigo-400">${r.comment || ''}</textarea>
+                                <textarea id="comment-${r.id}" rows="1" placeholder="Например: Встреча в 14:00..." class="w-full px-3 py-2 bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-600 rounded-lg text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-400">${r.comment || ''}</textarea>
                                 <button onclick="saveComment(${r.id})" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">💾 Сохранить</button>
                             </div>
                         </div>
@@ -474,8 +554,6 @@
                 showPsychologist();
             }
         };
-        
-        // УСКОРЕНО: Обновляем каждые 3 секунды (вместо 15)
         setInterval(loadData, 3000); 
     </script>
 </body>
