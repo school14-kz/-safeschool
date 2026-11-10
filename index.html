@@ -36,7 +36,7 @@
                     <span id="themeIcon">🌙</span>
                 </button>
 
-                <!-- Кнопка Входа/Возврата в кабинет -->
+                <!-- Кнопка Входа/Возврата -->
                 <button id="roleToggleBtn" onclick="openLoginModal()" class="relative text-xs bg-rose-50 text-rose-600 border border-rose-200 dark:bg-slate-700 dark:text-rose-400 dark:border-slate-600 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-slate-600 transition">
                     <span id="btnText">👩‍⚕️ Психолог</span>
                     <span id="newBadge" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
@@ -206,7 +206,7 @@
         </div>
     </main>
 
-    <!-- Модалка Входа (ОБНОВЛЕНА) -->
+    <!-- Модалка Входа -->
     <div id="loginModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full shadow-xl space-y-4 transition-colors">
             <div class="text-center mb-2">
@@ -217,7 +217,6 @@
             
             <div class="relative">
                 <input type="password" id="loginPassword" placeholder="Пароль..." onkeydown="if(event.key==='Enter') checkPassword()" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 pr-12">
-                <!-- Кнопка показать/скрыть пароль -->
                 <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg">👁️</button>
             </div>
 
@@ -251,22 +250,16 @@
         let myReportIds = JSON.parse(localStorage.getItem('safe_school_my_reports')) || [];
         let statsChartInstance = null;
 
-        const BADGE_HTML = '<span id="newBadge" class="hidden absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span></span>';
-
-        // НОВАЯ ФУНКЦИЯ: Показать/скрыть пароль
-        function togglePasswordVisibility() {
-            const input = document.getElementById('loginPassword');
-            if (input.type === 'password') {
-                input.type = 'text';
-            } else {
-                input.type = 'password';
-            }
+        // Вспомогательная функция для кнопки входа
+        function setHeaderButton(text, onclickFunc) {
+            document.getElementById('btnText').innerText = text;
+            document.getElementById('roleToggleBtn').onclick = onclickFunc;
         }
 
-        function setHeaderButton(text, onclickFunc) {
-            const btn = document.getElementById('roleToggleBtn');
-            btn.innerHTML = '<span id="btnText">' + text + '</span>' + BADGE_HTML;
-            btn.setAttribute('onclick', onclickFunc);
+        // Показать/скрыть пароль
+        function togglePasswordVisibility() {
+            const input = document.getElementById('loginPassword');
+            input.type = input.type === 'password' ? 'text' : 'password';
         }
 
         // --- ТЕМНАЯ ТЕМА ---
@@ -332,8 +325,8 @@
         function openLoginModal() { 
             document.getElementById('loginModal').classList.remove('hidden'); 
             document.getElementById('loginModal').classList.add('flex'); 
-            document.getElementById('loginPassword').value = ''; // Сбрасываем пароль при открытии
-            document.getElementById('loginPassword').type = 'password'; // Сбрасываем видимость
+            document.getElementById('loginPassword').value = ''; 
+            document.getElementById('loginPassword').type = 'password'; 
         }
         function closeLoginModal() { 
             document.getElementById('loginModal').classList.add('hidden'); 
@@ -429,7 +422,6 @@
             } catch (e) { alert("Ошибка сохранения."); }
         }
 
-        // ОБНОВЛЕННАЯ ПРОВЕРКА ПАРОЛЯ
         function checkPassword() {
             const pass = document.getElementById('loginPassword').value;
             if (pass === PSYCHOLOGIST_PASSWORD) { 
@@ -446,7 +438,8 @@
             document.getElementById('sosBtn').classList.add('hidden');
             document.getElementById('previewBanner').classList.add('hidden');
             
-            setHeaderButton("📱 Ученик", "switchToStudent");
+            // Меняем кнопку на "Ученик" и привязываем правильную функцию
+            setHeaderButton("📱 Ученик", switchToStudent);
             
             setFilter('active'); 
             localStorage.setItem('safe_school_psychologist', 'true');
@@ -463,21 +456,19 @@
             
             if (isPsychologist) {
                 document.getElementById('previewBanner').classList.remove('hidden');
-                setHeaderButton("🔙 В кабинет", "showPsychologist");
+                setHeaderButton("🔙 В кабинет", showPsychologist); // Привязываем функцию showPsychologist
                 localStorage.setItem('safe_school_view', 'student');
             } else {
                 document.getElementById('previewBanner').classList.add('hidden');
-                setHeaderButton("👩‍⚕️ Психолог", "openLoginModal");
+                setHeaderButton("👩‍⚕️ Психолог", openLoginModal); // Привязываем функцию openLoginModal
             }
         }
 
-        // ОБНОВЛЕННЫЙ ВЫХОД
         function logoutPsychologist() {
             if (confirm('Выйти из кабинета психолога? Придется снова ввести пароль.')) {
                 localStorage.setItem('safe_school_psychologist', 'false');
                 localStorage.setItem('safe_school_view', 'student');
                 switchToStudent();
-                // Принудительно очищаем поле пароля в памяти
                 document.getElementById('loginPassword').value = '';
             }
         }
