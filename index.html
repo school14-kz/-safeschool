@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeSchool Казахстан — Служба доверия</title>
     
-    <link rel="manifest" href="manifest.json">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -32,9 +30,6 @@
             </div>
             
             <div class="flex items-center space-x-2">
-                <!-- КНОПКА УСТАНОВКИ (ВСЕГДА ВИДНА) -->
-                <button id="installPwaBtn" onclick="installPwa()" class="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-400 font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-200 transition">📲 Установить</button>
-
                 <!-- Кнопка SOS -->
                 <button id="sosBtn" onclick="quickExit()" class="text-xs bg-red-600 text-white border border-red-700 font-bold px-3 py-1.5 rounded-lg hover:bg-red-700 transition shadow-md animate-pulse">🆘 SOS</button>
 
@@ -229,13 +224,6 @@
     </div>
 
     <script>
-        // --- РЕГИСТРАЦИЯ SERVICE WORKER ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error', err));
-            });
-        }
-
         const BIN_ID = "6af3158dffd5d16053b6a4ae"; 
         const MASTER_KEY = "$2a$10$5OG8yAXzsTfGHDGr/POtMOcu6YnKqlOE1CCYpXFlgRCCiVp7AwWOe";
         const API_URL = "https://api.jsonbin.io/v3/b/" + BIN_ID;
@@ -247,29 +235,6 @@
         const PSYCHOLOGIST_PASSWORD = 'bagdagul';
         let myReportIds = JSON.parse(localStorage.getItem('safe_school_my_reports')) || [];
         let statsChartInstance = null;
-        let deferredPrompt;
-
-        // --- УСТАНОВКА НА ТЕЛЕФОН ---
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
-
-        function installPwa() {
-            if (deferredPrompt) {
-                // Если браузер готов, показываем родное окно установки
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        document.getElementById('installPwaBtn').innerText = "✅ Установлено";
-                    }
-                    deferredPrompt = null;
-                });
-            } else {
-                // Если браузер не готов (не созданы файлы или кэш), даем инструкцию
-                alert("Чтобы установить приложение SafeSchool:\n\n1. Нажмите на три точки (⋮) в правом верхнем углу браузера Chrome.\n2. Выберите «Установить приложение» или «Добавить на главный экран».\n\n(Если вы на iPhone, нажмите кнопку «Поделиться» и выберите «На экран Домой»).");
-            }
-        }
 
         // --- ТЕМНАЯ ТЕМА ---
         const html = document.documentElement;
