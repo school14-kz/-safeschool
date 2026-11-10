@@ -15,14 +15,23 @@
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
             <div class="flex items-center space-x-3">
-                <div class="bg-rose-500 text-white p-2 rounded-xl font-bold text-lg shadow-sm">🛡️</div>
+                <!-- Герб Казахстана вместо щита -->
+                <div class="bg-white p-1 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center w-11 h-11">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Emblem_of_Kazakhstan.svg/240px-Emblem_of_Kazakhstan.svg.png" alt="Герб РК" class="w-full h-full object-contain">
+                </div>
                 <div>
                     <h1 class="font-bold text-slate-900 leading-tight">SafeSchool</h1>
                     <p class="text-xs text-slate-500">Школьная служба доверия РК</p>
                 </div>
             </div>
             <div>
-                <button id="roleToggleBtn" onclick="openLoginModal()" class="text-xs bg-rose-50 text-rose-600 border border-rose-200 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-100 transition">👩‍⚕️ Психолог</button>
+                <button id="roleToggleBtn" onclick="openLoginModal()" class="relative text-xs bg-rose-50 text-rose-600 border border-rose-200 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-100 transition">
+                    👩‍⚕️ Психолог
+                    <span id="newBadge" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                    </span>
+                </button>
             </div>
         </div>
     </header>
@@ -32,7 +41,7 @@
         <!-- СТРАНИЦА УЧЕНИКА -->
         <div id="studentView" class="space-y-5">
             
-            <!-- Памятка (Советы) -->
+            <!-- Памятка -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <button onclick="toggleTips()" class="w-full p-5 flex items-center justify-between text-left focus:outline-none">
                     <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-sm">
@@ -58,7 +67,6 @@
                             <li>Не удаляй переписку и не отвечай на провокации.</li>
                         </ul>
                     </div>
-                    <p class="text-xs text-slate-500 italic">Помни: ты не виноват в том, что кто-то ведет себя недостойно. Ты имеешь право на безопасность!</p>
                 </div>
             </div>
 
@@ -97,6 +105,17 @@
                         </div>
                     </div>
                     <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Тип проблемы</label>
+                        <select id="myCategory" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition">
+                            <option value="Оскорбления / Слова">Оскорбления / Слова</option>
+                            <option value="Физическое насилие">Физическое насилие</option>
+                            <option value="Кибербуллинг (в сети)">Кибербуллинг (в сети)</option>
+                            <option value="Игнорирование / Бойкот">Игнорирование / Бойкот</option>
+                            <option value="Порча вещей">Порча вещей</option>
+                            <option value="Другое">Другое</option>
+                        </select>
+                    </div>
+                    <div>
                         <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Что произошло?</label>
                         <textarea id="myDesc" rows="4" required placeholder="Опишите ситуацию..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition"></textarea>
                     </div>
@@ -106,7 +125,6 @@
                 </form>
             </div>
 
-            <!-- Экстренные контакты -->
             <div class="bg-rose-500 text-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
                 <div>
                     <h3 class="font-bold text-sm">Экстренная помощь</h3>
@@ -141,7 +159,17 @@
             </div>
 
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-slate-900 mb-4">Журнал обращений</h3>
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
+                    <h3 class="font-bold text-slate-900">Журнал обращений</h3>
+                    <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold">
+                        <button onclick="setFilter('all')" id="filter-all" class="bg-slate-900 text-white px-3 py-1.5 rounded-lg border border-slate-900 transition">Все</button>
+                        <button onclick="setFilter('Новое')" id="filter-Новое" class="bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition">Новые</button>
+                        <button onclick="setFilter('В работе')" id="filter-В работе" class="bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition">В работе</button>
+                        <button onclick="setFilter('Встреча')" id="filter-Встреча" class="bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition">Встречи</button>
+                        <button onclick="setFilter('Решено')" id="filter-Решено" class="bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition">Решено</button>
+                    </div>
+                </div>
+                
                 <div id="reportsList" class="space-y-4">
                     <p class="text-xs text-slate-400 text-center py-6">Загрузка данных...</p>
                 </div>
@@ -177,9 +205,12 @@
         
         let reports = [];
         let isFetching = false;
+        let currentFilter = 'all';
+        let lastCount = 0; 
         const PSYCHOLOGIST_PASSWORD = 'bagdagul';
+        
+        const notifSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
 
-        // Функция открытия/закрытия памятки
         function toggleTips() {
             const content = document.getElementById('tipsContent');
             const icon = document.getElementById('tipsIcon');
@@ -192,9 +223,17 @@
             }
         }
 
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('[id^="filter-"]').forEach(btn => {
+                btn.className = 'bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition';
+            });
+            document.getElementById(`filter-${filter}`).className = 'bg-slate-900 text-white px-3 py-1.5 rounded-lg border border-slate-900 transition';
+            renderReports();
+        }
+
         async function loadData() {
             if (isFetching) return;
-            // Защита: если психолог печатает комментарий, не обновляем экран принудительно
             if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') return;
             
             isFetching = true;
@@ -207,7 +246,12 @@
                 
                 const data = await res.json();
                 if (data && data.posts) {
-                    // Проверяем, изменилось ли что-то, чтобы не перерисовывать зря
+                    if (data.posts.length > lastCount && lastCount > 0) {
+                        notifSound.play().catch(e => console.log('Звук заблокирован'));
+                        document.getElementById('newBadge').classList.remove('hidden');
+                    }
+                    lastCount = data.posts.length;
+
                     if (JSON.stringify(reports) !== JSON.stringify(data.posts)) {
                         reports = data.posts;
                         renderReports();
@@ -231,13 +275,14 @@
                 });
             } catch (e) {
                 console.error("Ошибка сохранения:", e);
-                alert("Ошибка соединения с базой. Проверьте интернет.");
+                alert("Ошибка соединения с базой.");
             }
         }
 
         function openLoginModal() {
             document.getElementById('loginModal').classList.remove('hidden');
             document.getElementById('loginModal').classList.add('flex');
+            document.getElementById('newBadge').classList.add('hidden'); 
         }
         function closeLoginModal() {
             document.getElementById('loginModal').classList.add('hidden');
@@ -259,13 +304,13 @@
             document.getElementById('psychologistView').classList.remove('hidden');
             document.getElementById('roleToggleBtn').innerText = "📱 Ученик";
             document.getElementById('roleToggleBtn').setAttribute('onclick', 'switchToStudent()');
-            renderReports();
+            setFilter('all'); 
         }
 
         function switchToStudent() {
             document.getElementById('psychologistView').classList.add('hidden');
             document.getElementById('studentView').classList.remove('hidden');
-            document.getElementById('roleToggleBtn').innerText = "👩‍⚕️ Психолог";
+            document.getElementById('roleToggleBtn').innerHTML = "👩‍⚕️ Психолог" + document.getElementById('newBadge').outerHTML;
             document.getElementById('roleToggleBtn').setAttribute('onclick', 'openLoginModal()');
         }
 
@@ -277,15 +322,16 @@
                 id: Date.now(),
                 name: document.getElementById('myName').value,
                 class: document.getElementById('myClass').value,
+                category: document.getElementById('myCategory').value,
                 bully: document.getElementById('bullyName').value,
                 desc: document.getElementById('myDesc').value,
                 status: "Новое",
                 date: new Date().toLocaleDateString('ru-RU'),
-                comment: "" // Поле для заметок психолога
+                comment: ""
             };
             reports.unshift(newReport); 
-            renderReports(); // Мгновенно показываем
-            await saveData(); // Сохраняем в фоне
+            renderReports(); 
+            await saveData(); 
             
             document.getElementById('reportForm').reset();
             document.getElementById('successModal').classList.remove('hidden');
@@ -297,17 +343,24 @@
             document.getElementById('successModal').classList.remove('flex');
         }
 
-        // Мгновенное обновление статуса
         function updateStatus(id, newStatus) {
             const report = reports.find(r => r.id === id);
             if (report) {
                 report.status = newStatus;
-                renderReports(); // Перерисовываем сразу (без задержки)
-                saveData(); // Отправляем в облако в фоне
+                renderReports(); 
+                saveData(); 
             }
         }
 
-        // Сохранение комментария к заявке
+        async function deleteReport(id) {
+            if (confirm('⚠️ Вы уверены, что хотите БЕЗВОЗВРАТНО удалить эту заявку?')) {
+                reports = reports.filter(r => r.id !== id); 
+                renderReports(); 
+                await saveData(); 
+                lastCount = reports.length; 
+            }
+        }
+
         function saveComment(id) {
             const text = document.getElementById(`comment-${id}`).value.trim();
             const report = reports.find(r => r.id === id);
@@ -330,56 +383,61 @@
             const listContainer = document.getElementById('reportsList');
             document.getElementById('statTotal').innerText = reports.length;
 
-            if (reports.length === 0) {
-                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Пока нет обращений.</p>`;
-                document.getElementById('statBullies').innerText = "—";
-                return;
+            const filtered = reports.filter(r => currentFilter === 'all' || r.status === currentFilter);
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">По этому фильтру обращений нет.</p>`;
+            } else {
+                listContainer.innerHTML = filtered.map(r => `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 shadow-sm">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-sm font-bold text-slate-900">${r.name}</span>
+                                <span class="text-[11px] text-slate-500 bg-slate-200 px-2 py-0.5 rounded">${r.class}</span>
+                                <span class="text-[10px] text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded font-semibold">${r.category || 'Другое'}</span>
+                                <span class="text-[10px] text-slate-400">${r.date}</span>
+                            </div>
+                            <span class="text-xs px-2.5 py-1 rounded-full font-semibold border ${statusClass(r.status)}">${r.status}</span>
+                        </div>
+                        
+                        <p class="text-xs text-slate-600"><b>Обидчик:</b> ${r.bully}</p>
+                        <p class="text-sm text-slate-800 bg-white p-3 rounded-lg border border-slate-200">${r.desc}</p>
+                        
+                        <div class="flex items-center flex-wrap gap-2 pt-1 border-b border-slate-200 pb-3">
+                            <button onclick="updateStatus(${r.id}, 'Новое')" class="text-[11px] bg-white border border-slate-300 px-2.5 py-1 rounded-lg hover:bg-slate-100 font-medium">🆕 Новое</button>
+                            <button onclick="updateStatus(${r.id}, 'В работе')" class="text-[11px] bg-amber-50 text-amber-700 border border-amber-300 px-2.5 py-1 rounded-lg hover:bg-amber-100 font-medium">⚙️ В работу</button>
+                            <button onclick="updateStatus(${r.id}, 'Встреча')" class="text-[11px] bg-purple-50 text-purple-700 border border-purple-300 px-2.5 py-1 rounded-lg hover:bg-purple-100 font-medium">📅 Встреча</button>
+                            <button onclick="updateStatus(${r.id}, 'Решено')" class="text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-300 px-2.5 py-1 rounded-lg hover:bg-emerald-100 font-medium">✅ Решено</button>
+                            <button onclick="updateStatus(${r.id}, 'Шутка / Ложный')" class="text-[11px] bg-rose-50 text-rose-600 border border-rose-300 px-2.5 py-1 rounded-lg hover:bg-rose-100 font-medium">⚠️ Ложный</button>
+                            
+                            <button onclick="deleteReport(${r.id})" class="text-[11px] bg-red-600 text-white border border-red-700 px-2.5 py-1 rounded-lg hover:bg-red-700 font-medium ml-auto transition">🗑️ Удалить</button>
+                        </div>
+
+                        <div class="pt-1">
+                            <label class="block text-[10px] font-bold uppercase text-indigo-500 mb-1">📝 Заметка психолога</label>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <textarea id="comment-${r.id}" rows="1" placeholder="Например: Встреча в 14:00, каб. 12..." class="w-full px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg text-xs focus:outline-none focus:border-indigo-400">${r.comment || ''}</textarea>
+                                <button onclick="saveComment(${r.id})" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">💾 Сохранить</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
             }
 
-            const bulliesCount = {};
-            reports.forEach(r => {
-                if (r.bully && r.bully !== '—') bulliesCount[r.bully] = (bulliesCount[r.bully] || 0) + 1;
-            });
-            const topBully = Object.keys(bulliesCount).sort((a,b) => bulliesCount[b]-bulliesCount[a])[0] || '—';
-            document.getElementById('statBullies').innerText = topBully;
-
-            listContainer.innerHTML = reports.map(r => `
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 shadow-sm">
-                    <div class="flex items-center justify-between flex-wrap gap-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-bold text-slate-900">${r.name}</span>
-                            <span class="text-[11px] text-slate-500 bg-slate-200 px-2 py-0.5 rounded">${r.class}</span>
-                            <span class="text-[10px] text-slate-400">${r.date}</span>
-                        </div>
-                        <span class="text-xs px-2.5 py-1 rounded-full font-semibold border ${statusClass(r.status)}">${r.status}</span>
-                    </div>
-                    
-                    <p class="text-xs text-slate-600"><b>Обидчик:</b> ${r.bully}</p>
-                    <p class="text-sm text-slate-800 bg-white p-3 rounded-lg border border-slate-200">${r.desc}</p>
-                    
-                    <!-- Блок управления статусами -->
-                    <div class="flex items-center flex-wrap gap-2 pt-1 border-b border-slate-200 pb-3">
-                        <button onclick="updateStatus(${r.id}, 'Новое')" class="text-[11px] bg-white border border-slate-300 px-2.5 py-1 rounded-lg hover:bg-slate-100 font-medium">🆕 Новое</button>
-                        <button onclick="updateStatus(${r.id}, 'В работе')" class="text-[11px] bg-amber-50 text-amber-700 border border-amber-300 px-2.5 py-1 rounded-lg hover:bg-amber-100 font-medium">⚙️ В работу</button>
-                        <button onclick="updateStatus(${r.id}, 'Встреча')" class="text-[11px] bg-purple-50 text-purple-700 border border-purple-300 px-2.5 py-1 rounded-lg hover:bg-purple-100 font-medium">📅 Встреча</button>
-                        <button onclick="updateStatus(${r.id}, 'Решено')" class="text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-300 px-2.5 py-1 rounded-lg hover:bg-emerald-100 font-medium">✅ Решено</button>
-                        <button onclick="updateStatus(${r.id}, 'Шутка / Ложный')" class="text-[11px] bg-rose-50 text-rose-600 border border-rose-300 px-2.5 py-1 rounded-lg hover:bg-rose-100 font-medium">⚠️ Ложный</button>
-                    </div>
-
-                    <!-- Блок заметок психолога -->
-                    <div class="pt-1">
-                        <label class="block text-[10px] font-bold uppercase text-indigo-500 mb-1">📝 Заметка психолога (внутренняя)</label>
-                        <div class="flex gap-2">
-                            <textarea id="comment-${r.id}" rows="2" placeholder="Например: Назначена встреча на 14:00..." class="w-full px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg text-xs focus:outline-none focus:border-indigo-400">${r.comment || ''}</textarea>
-                            <button onclick="saveComment(${r.id})" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-3 rounded-lg transition">💾 Сохранить</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+            if (reports.length > 0) {
+                const bulliesCount = {};
+                reports.forEach(r => {
+                    if (r.bully && r.bully !== '—') bulliesCount[r.bully] = (bulliesCount[r.bully] || 0) + 1;
+                });
+                const topBully = Object.keys(bulliesCount).sort((a,b) => bulliesCount[b]-bulliesCount[a])[0] || '—';
+                document.getElementById('statBullies').innerText = topBully;
+            } else {
+                document.getElementById('statBullies').innerText = "—";
+            }
         }
 
         loadData();
-        setInterval(loadData, 15000); // Автообновление раз в 15 сек
+        setInterval(loadData, 15000); 
     </script>
 </body>
 </html>
