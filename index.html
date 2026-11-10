@@ -30,21 +30,54 @@
     <main class="flex-1 max-w-xl md:max-w-4xl mx-auto w-full p-4 md:py-8">
 
         <!-- СТРАНИЦА УЧЕНИКА -->
-        <div id="studentView" class="space-y-6">
+        <div id="studentView" class="space-y-5">
+            
+            <!-- Памятка (Советы) -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <button onclick="toggleTips()" class="w-full p-5 flex items-center justify-between text-left focus:outline-none">
+                    <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-sm">
+                        <span>📖</span>
+                        <span>Памятка: Как противостоять травле</span>
+                    </div>
+                    <span id="tipsIcon" class="text-slate-400 transition-transform">▼</span>
+                </button>
+                <div id="tipsContent" class="hidden p-5 pt-0 text-sm text-slate-600 space-y-3 border-t border-slate-100">
+                    <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100">
+                        <b>Что делать при буллинге:</b>
+                        <ul class="list-disc pl-4 mt-1 space-y-1 text-xs">
+                            <li>Не отвечай агрессией. Спокойствие — твоя защита.</li>
+                            <li>Не оставайся один на один с обидчиком, держись рядом с друзьями.</li>
+                            <li>Сообщи взрослым (родителям, классному руководителю, психологу).</li>
+                        </ul>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded-xl border border-purple-100">
+                        <b>Что делать при кибербуллинге (в сети):</b>
+                        <ul class="list-disc pl-4 mt-1 space-y-1 text-xs">
+                            <li><b>Сделай скриншоты!</b> Это главное доказательство.</li>
+                            <li>Заблокируй обидчика и пожалуйся администрации соцсети.</li>
+                            <li>Не удаляй переписку и не отвечай на провокации.</li>
+                        </ul>
+                    </div>
+                    <p class="text-xs text-slate-500 italic">Помни: ты не виноват в том, что кто-то ведет себя недостойно. Ты имеешь право на безопасность!</p>
+                </div>
+            </div>
+
+            <!-- Конфиденциальность -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                 <div class="flex items-center space-x-2 text-rose-600 font-semibold text-sm">
                     <span>🔒</span>
                     <span>Полная конфиденциальность</span>
                 </div>
                 <p class="text-sm text-slate-600 leading-relaxed">
-                    Обязательно укажите свое имя и класс! Не переживайте: <b>ваше имя никто не видит, кроме школьного психолога</b>. Ни одноклассники, ни те, кто вас обижает, никогда не узнают, кто отправил жалобу.
+                    Ваше имя никто не видит, кроме школьного психолога. Ни одноклассники, ни обидчики не узнают, кто отправил жалобу.
                 </p>
                 <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-start space-x-2 text-xs text-amber-800">
                     <span class="text-base">⚠️</span>
-                    <span><b>Внимание: Не пишите в шутку!</b> Ложные доносы и фейковые заявки караются законом Республики Казахстан и школьным уставом.</span>
+                    <span><b>Внимание: Не пишите в шутку!</b> Ложные доносы караются школьным уставом.</span>
                 </div>
             </div>
 
+            <!-- Форма -->
             <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-sm">
                 <h2 class="text-lg font-bold text-slate-900 mb-4">Сообщить о ситуации</h2>
                 <form id="reportForm" onsubmit="submitReport(event)" class="space-y-4">
@@ -73,6 +106,7 @@
                 </form>
             </div>
 
+            <!-- Экстренные контакты -->
             <div class="bg-rose-500 text-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
                 <div>
                     <h3 class="font-bold text-sm">Экстренная помощь</h3>
@@ -108,7 +142,7 @@
 
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                 <h3 class="font-bold text-slate-900 mb-4">Журнал обращений</h3>
-                <div id="reportsList" class="space-y-3">
+                <div id="reportsList" class="space-y-4">
                     <p class="text-xs text-slate-400 text-center py-6">Загрузка данных...</p>
                 </div>
             </div>
@@ -137,17 +171,32 @@
     </div>
 
     <script>
-        // ТВОИ КЛЮЧИ УЖЕ ВСТАВЛЕНЫ СЮДА
         const BIN_ID = "6af3158dffd5d16053b6a4ae"; 
         const MASTER_KEY = "$2a$10$5OG8yAXzsTfGHDGr/POtMOcu6YnKqlOE1CCYpXFlgRCCiVp7AwWOe";
-        
         const API_URL = "https://api.jsonbin.io/v3/b/" + BIN_ID;
+        
         let reports = [];
         let isFetching = false;
-        const PSYCHOLOGIST_PASSWORD = 'bagdagul'; // Пароль для входа
+        const PSYCHOLOGIST_PASSWORD = 'bagdagul';
+
+        // Функция открытия/закрытия памятки
+        function toggleTips() {
+            const content = document.getElementById('tipsContent');
+            const icon = document.getElementById('tipsIcon');
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
 
         async function loadData() {
             if (isFetching) return;
+            // Защита: если психолог печатает комментарий, не обновляем экран принудительно
+            if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') return;
+            
             isFetching = true;
             try {
                 const res = await fetch(`${API_URL}/latest`, {
@@ -158,8 +207,11 @@
                 
                 const data = await res.json();
                 if (data && data.posts) {
-                    reports = data.posts;
-                    renderReports();
+                    // Проверяем, изменилось ли что-то, чтобы не перерисовывать зря
+                    if (JSON.stringify(reports) !== JSON.stringify(data.posts)) {
+                        reports = data.posts;
+                        renderReports();
+                    }
                 } else {
                     await saveData();
                 }
@@ -177,10 +229,9 @@
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
                     body: JSON.stringify({ posts: reports })
                 });
-                loadData();
             } catch (e) {
                 console.error("Ошибка сохранения:", e);
-                alert("Ошибка соединения. Попробуйте еще раз.");
+                alert("Ошибка соединения с базой. Проверьте интернет.");
             }
         }
 
@@ -229,10 +280,13 @@
                 bully: document.getElementById('bullyName').value,
                 desc: document.getElementById('myDesc').value,
                 status: "Новое",
-                date: new Date().toLocaleDateString('ru-RU')
+                date: new Date().toLocaleDateString('ru-RU'),
+                comment: "" // Поле для заметок психолога
             };
             reports.unshift(newReport); 
-            await saveData(); 
+            renderReports(); // Мгновенно показываем
+            await saveData(); // Сохраняем в фоне
+            
             document.getElementById('reportForm').reset();
             document.getElementById('successModal').classList.remove('hidden');
             document.getElementById('successModal').classList.add('flex');
@@ -243,16 +297,33 @@
             document.getElementById('successModal').classList.remove('flex');
         }
 
-        async function updateStatus(id, newStatus) {
-            reports = reports.map(r => r.id === id ? {...r, status: newStatus} : r);
-            await saveData();
+        // Мгновенное обновление статуса
+        function updateStatus(id, newStatus) {
+            const report = reports.find(r => r.id === id);
+            if (report) {
+                report.status = newStatus;
+                renderReports(); // Перерисовываем сразу (без задержки)
+                saveData(); // Отправляем в облако в фоне
+            }
+        }
+
+        // Сохранение комментария к заявке
+        function saveComment(id) {
+            const text = document.getElementById(`comment-${id}`).value.trim();
+            const report = reports.find(r => r.id === id);
+            if (report) {
+                report.comment = text;
+                alert('✅ Заметка сохранена!');
+                saveData();
+            }
         }
 
         function statusClass(status) {
-            if (status === 'Шутка / Ложный') return 'bg-red-100 text-red-700';
-            if (status === 'В работе') return 'bg-amber-100 text-amber-700';
-            if (status === 'Решено') return 'bg-emerald-100 text-emerald-700';
-            return 'bg-blue-100 text-blue-700';
+            if (status === 'Шутка / Ложный') return 'bg-red-100 text-red-700 border-red-200';
+            if (status === 'В работе') return 'bg-amber-100 text-amber-700 border-amber-200';
+            if (status === 'Решено') return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+            if (status === 'Встреча') return 'bg-purple-100 text-purple-700 border-purple-200';
+            return 'bg-blue-100 text-blue-700 border-blue-200';
         }
 
         function renderReports() {
@@ -273,29 +344,42 @@
             document.getElementById('statBullies').innerText = topBully;
 
             listContainer.innerHTML = reports.map(r => `
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 shadow-sm">
                     <div class="flex items-center justify-between flex-wrap gap-2">
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-slate-900">${r.name}</span>
-                            <span class="text-[11px] text-slate-400">· ${r.class}</span>
-                            <span class="text-[10px] text-slate-400">· ${r.date}</span>
+                            <span class="text-sm font-bold text-slate-900">${r.name}</span>
+                            <span class="text-[11px] text-slate-500 bg-slate-200 px-2 py-0.5 rounded">${r.class}</span>
+                            <span class="text-[10px] text-slate-400">${r.date}</span>
                         </div>
-                        <span class="text-xs px-2.5 py-1 rounded-full font-semibold ${statusClass(r.status)}">${r.status}</span>
+                        <span class="text-xs px-2.5 py-1 rounded-full font-semibold border ${statusClass(r.status)}">${r.status}</span>
                     </div>
+                    
                     <p class="text-xs text-slate-600"><b>Обидчик:</b> ${r.bully}</p>
-                    <p class="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-slate-100">${r.desc}</p>
-                    <div class="flex items-center flex-wrap gap-2 pt-1">
-                        <button onclick="updateStatus(${r.id}, 'Новое')" class="text-[11px] bg-white border border-slate-200 px-2.5 py-1 rounded-lg">🆕 Новое</button>
-                        <button onclick="updateStatus(${r.id}, 'В работе')" class="text-[11px] bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg">⚙️ В работу</button>
-                        <button onclick="updateStatus(${r.id}, 'Решено')" class="text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg">✅ Решено</button>
-                        <button onclick="updateStatus(${r.id}, 'Шутка / Ложный')" class="text-[11px] bg-rose-50 text-rose-600 border border-rose-200 px-2.5 py-1 rounded-lg">⚠️ Ложный</button>
+                    <p class="text-sm text-slate-800 bg-white p-3 rounded-lg border border-slate-200">${r.desc}</p>
+                    
+                    <!-- Блок управления статусами -->
+                    <div class="flex items-center flex-wrap gap-2 pt-1 border-b border-slate-200 pb-3">
+                        <button onclick="updateStatus(${r.id}, 'Новое')" class="text-[11px] bg-white border border-slate-300 px-2.5 py-1 rounded-lg hover:bg-slate-100 font-medium">🆕 Новое</button>
+                        <button onclick="updateStatus(${r.id}, 'В работе')" class="text-[11px] bg-amber-50 text-amber-700 border border-amber-300 px-2.5 py-1 rounded-lg hover:bg-amber-100 font-medium">⚙️ В работу</button>
+                        <button onclick="updateStatus(${r.id}, 'Встреча')" class="text-[11px] bg-purple-50 text-purple-700 border border-purple-300 px-2.5 py-1 rounded-lg hover:bg-purple-100 font-medium">📅 Встреча</button>
+                        <button onclick="updateStatus(${r.id}, 'Решено')" class="text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-300 px-2.5 py-1 rounded-lg hover:bg-emerald-100 font-medium">✅ Решено</button>
+                        <button onclick="updateStatus(${r.id}, 'Шутка / Ложный')" class="text-[11px] bg-rose-50 text-rose-600 border border-rose-300 px-2.5 py-1 rounded-lg hover:bg-rose-100 font-medium">⚠️ Ложный</button>
+                    </div>
+
+                    <!-- Блок заметок психолога -->
+                    <div class="pt-1">
+                        <label class="block text-[10px] font-bold uppercase text-indigo-500 mb-1">📝 Заметка психолога (внутренняя)</label>
+                        <div class="flex gap-2">
+                            <textarea id="comment-${r.id}" rows="2" placeholder="Например: Назначена встреча на 14:00..." class="w-full px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg text-xs focus:outline-none focus:border-indigo-400">${r.comment || ''}</textarea>
+                            <button onclick="saveComment(${r.id})" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-3 rounded-lg transition">💾 Сохранить</button>
+                        </div>
                     </div>
                 </div>
             `).join('');
         }
 
         loadData();
-        setInterval(loadData, 15000); 
+        setInterval(loadData, 15000); // Автообновление раз в 15 сек
     </script>
 </body>
 </html>
