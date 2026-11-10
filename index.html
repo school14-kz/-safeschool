@@ -37,6 +37,7 @@
 
     <main class="flex-1 max-w-xl md:max-w-4xl mx-auto w-full p-4 md:py-8">
 
+        <!-- СТРАНИЦА УЧЕНИКА -->
         <div id="studentView" class="space-y-5">
             
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -132,6 +133,7 @@
             </div>
         </div>
 
+        <!-- КАБИНЕТ ПСИХОЛОГА -->
         <div id="psychologistView" class="hidden space-y-6">
             <div class="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                 <div>
@@ -155,19 +157,23 @@
             <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
                     <h3 class="font-bold text-slate-900">Журнал обращений</h3>
-                    <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold">
-                        <button onclick="setFilter('all')" id="filter-all" class="bg-slate-900 text-white px-3 py-1.5 rounded-lg border border-slate-900 transition">Все</button>
-                        <button onclick="setFilter('Новое')" id="filter-Новое" class="bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition">Новые</button>
-                        <button onclick="setFilter('В работе')" id="filter-В работе" class="bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition">В работе</button>
-                        <button onclick="setFilter('Встреча')" id="filter-Встреча" class="bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition">Встречи</button>
-                        <button onclick="setFilter('Решено')" id="filter-Решено" class="bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition">Решено</button>
+                    
+                    <!-- ВКЛАДКИ КАБИНЕТА -->
+                    <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold bg-slate-100 p-1 rounded-xl">
+                        <button onclick="setFilter('active')" id="filter-active" class="bg-white shadow-sm text-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 transition">🔴 Активные</button>
+                        <button onclick="setFilter('resolved')" id="filter-resolved" class="text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition">🟢 Решённые</button>
+                        <button onclick="setFilter('all')" id="filter-all" class="text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition">⚪ Все</button>
                     </div>
                 </div>
-                <div id="reportsList" class="space-y-4"><p class="text-xs text-slate-400 text-center py-6">Загрузка данных...</p></div>
+                
+                <div id="reportsList" class="space-y-4">
+                    <p class="text-xs text-slate-400 text-center py-6">Загрузка данных...</p>
+                </div>
             </div>
         </div>
     </main>
 
+    <!-- Модалки -->
     <div id="loginModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white p-6 rounded-2xl max-w-sm w-full shadow-xl space-y-4">
             <h3 class="font-bold text-lg text-slate-900">Вход для психолога</h3>
@@ -195,11 +201,13 @@
         
         let reports = [];
         let isFetching = false;
-        let currentFilter = 'all';
+        let currentFilter = 'active'; // По умолчанию показываем активные
         let lastCount = 0; 
         const PSYCHOLOGIST_PASSWORD = 'bagdagul';
         
-        const notifSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+        // ГРОМКИЙ И ДЛИННЫЙ ЗВУК
+        const notifSound = new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg');
+        notifSound.volume = 1.0;
 
         function toggleTips() {
             const content = document.getElementById('tipsContent');
@@ -213,12 +221,18 @@
             }
         }
 
+        // НОВАЯ ЛОГИКА ФИЛЬТРОВ (ВКЛАДОК)
         function setFilter(filter) {
             currentFilter = filter;
-            document.querySelectorAll('[id^="filter-"]').forEach(btn => {
-                btn.className = 'bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition';
-            });
-            document.getElementById(`filter-${filter}`).className = 'bg-slate-900 text-white px-3 py-1.5 rounded-lg border border-slate-900 transition';
+            
+            // Сброс стилей всех кнопок
+            document.getElementById('filter-active').className = 'text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition';
+            document.getElementById('filter-resolved').className = 'text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition';
+            document.getElementById('filter-all').className = 'text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition';
+            
+            // Активация выбранной
+            document.getElementById(`filter-${filter}`).className = 'bg-white shadow-sm text-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 transition';
+            
             renderReports();
         }
 
@@ -237,7 +251,7 @@
                 const data = await res.json();
                 if (data && data.posts) {
                     if (data.posts.length > lastCount && lastCount > 0) {
-                        notifSound.play().catch(e => console.log('Звук заблокирован'));
+                        notifSound.play().catch(e => console.log('Звук заблокирован браузером'));
                         document.getElementById('newBadge').classList.remove('hidden');
                     }
                     lastCount = data.posts.length;
@@ -289,12 +303,14 @@
             }
         }
 
+        // ПСИХОЛОГ НЕ ВЫХОДИТ ПРИ ОБНОВЛЕНИИ
         function showPsychologist() {
             document.getElementById('studentView').classList.add('hidden');
             document.getElementById('psychologistView').classList.remove('hidden');
             document.getElementById('roleToggleBtn').innerText = "📱 Ученик";
             document.getElementById('roleToggleBtn').setAttribute('onclick', 'switchToStudent()');
-            setFilter('all'); 
+            setFilter('active'); 
+            localStorage.setItem('safe_school_psychologist', 'true'); // Запоминаем вход
         }
 
         function switchToStudent() {
@@ -302,9 +318,13 @@
             document.getElementById('studentView').classList.remove('hidden');
             document.getElementById('roleToggleBtn').innerHTML = "👩‍⚕️ Психолог" + document.getElementById('newBadge').outerHTML;
             document.getElementById('roleToggleBtn').setAttribute('onclick', 'openLoginModal()');
+            localStorage.setItem('safe_school_psychologist', 'false'); // Забываем вход
         }
 
-        function logoutPsychologist() { switchToStudent(); }
+        function logoutPsychologist() { 
+            switchToStudent(); 
+            alert('Вы вышли из кабинета психолога.');
+        }
 
         async function submitReport(e) {
             e.preventDefault();
@@ -373,10 +393,24 @@
             const listContainer = document.getElementById('reportsList');
             document.getElementById('statTotal').innerText = reports.length;
 
-            const filtered = reports.filter(r => currentFilter === 'all' || r.status === currentFilter);
+            // Логика вкладок
+            let filtered = [];
+            if (currentFilter === 'active') {
+                // Активные: всё, что не Решено и не Ложное
+                filtered = reports.filter(r => r.status !== 'Решено' && r.status !== 'Шутка / Ложный');
+            } else if (currentFilter === 'resolved') {
+                // Решённые: только те, где стоит статус "Решено"
+                filtered = reports.filter(r => r.status === 'Решено');
+            } else {
+                // Все
+                filtered = reports;
+            }
 
             if (filtered.length === 0) {
-                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">По этому фильтру обращений нет.</p>`;
+                let msg = "Обращений нет.";
+                if (currentFilter === 'active') msg = "Нет активных обращений. Всё решено! 🎉";
+                if (currentFilter === 'resolved') msg = "В архиве пока нет решённых дел.";
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">${msg}</p>`;
             } else {
                 listContainer.innerHTML = filtered.map(r => `
                     <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 shadow-sm">
@@ -426,7 +460,13 @@
             }
         }
 
-        loadData();
+        // ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ПРОВЕРЯЕМ, НЕ ПСИХОЛОГ ЛИ ЭТО
+        window.onload = () => {
+            loadData();
+            if (localStorage.getItem('safe_school_psychologist') === 'true') {
+                showPsychologist();
+            }
+        };
         setInterval(loadData, 15000); 
     </script>
 </body>
