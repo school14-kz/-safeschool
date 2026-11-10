@@ -2,442 +2,47 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeSchool Казахстан — Служба доверия</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>SafeSchool - Школьная служба доверия</title>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        /* Немного стилей для красоты */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #ccc;
+        }
+        .police-emblem {
+            width: 60px; 
+            height: auto;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body>
 
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-            <div class="flex items-center space-x-3">
-                <!-- Герб Казахстана вместо щита -->
-                <div class="bg-white p-1 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center w-11 h-11">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Emblem_of_Kazakhstan.svg/240px-Emblem_of_Kazakhstan.svg.png" alt="Герб РК" class="w-full h-full object-contain">
-                </div>
-                <div>
-                    <h1 class="font-bold text-slate-900 leading-tight">SafeSchool</h1>
-                    <p class="text-xs text-slate-500">Школьная служба доверия РК</p>
-                </div>
-            </div>
-            <div>
-                <button id="roleToggleBtn" onclick="openLoginModal()" class="relative text-xs bg-rose-50 text-rose-600 border border-rose-200 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-100 transition">
-                    👩‍⚕️ Психолог
-                    <span id="newBadge" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
-                    </span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-xl md:max-w-4xl mx-auto w-full p-4 md:py-8">
-
-        <!-- СТРАНИЦА УЧЕНИКА -->
-        <div id="studentView" class="space-y-5">
-            
-            <!-- Памятка -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <button onclick="toggleTips()" class="w-full p-5 flex items-center justify-between text-left focus:outline-none">
-                    <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-sm">
-                        <span>📖</span>
-                        <span>Памятка: Как противостоять травле</span>
-                    </div>
-                    <span id="tipsIcon" class="text-slate-400 transition-transform">▼</span>
-                </button>
-                <div id="tipsContent" class="hidden p-5 pt-0 text-sm text-slate-600 space-y-3 border-t border-slate-100">
-                    <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100">
-                        <b>Что делать при буллинге:</b>
-                        <ul class="list-disc pl-4 mt-1 space-y-1 text-xs">
-                            <li>Не отвечай агрессией. Спокойствие — твоя защита.</li>
-                            <li>Не оставайся один на один с обидчиком, держись рядом с друзьями.</li>
-                            <li>Сообщи взрослым (родителям, классному руководителю, психологу).</li>
-                        </ul>
-                    </div>
-                    <div class="bg-purple-50 p-3 rounded-xl border border-purple-100">
-                        <b>Что делать при кибербуллинге (в сети):</b>
-                        <ul class="list-disc pl-4 mt-1 space-y-1 text-xs">
-                            <li><b>Сделай скриншоты!</b> Это главное доказательство.</li>
-                            <li>Заблокируй обидчика и пожалуйся администрации соцсети.</li>
-                            <li>Не удаляй переписку и не отвечай на провокации.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Конфиденциальность -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <div class="flex items-center space-x-2 text-rose-600 font-semibold text-sm">
-                    <span>🔒</span>
-                    <span>Полная конфиденциальность</span>
-                </div>
-                <p class="text-sm text-slate-600 leading-relaxed">
-                    Ваше имя никто не видит, кроме школьного психолога. Ни одноклассники, ни обидчики не узнают, кто отправил жалобу.
-                </p>
-                <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-start space-x-2 text-xs text-amber-800">
-                    <span class="text-base">⚠️</span>
-                    <span><b>Внимание: Не пишите в шутку!</b> Ложные доносы караются школьным уставом.</span>
-                </div>
-            </div>
-
-            <!-- Форма -->
-            <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <h2 class="text-lg font-bold text-slate-900 mb-4">Сообщить о ситуации</h2>
-                <form id="reportForm" onsubmit="submitReport(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Ваше имя и фамилия</label>
-                        <input type="text" id="myName" required placeholder="Например: Алишер Каримов" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition">
-                        <p class="text-[11px] text-rose-500 mt-1">🔒 Видит только психолог!</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Ваш класс</label>
-                            <input type="text" id="myClass" required placeholder="8 «Б»" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Кто обижает</label>
-                            <input type="text" id="bullyName" required placeholder="Имя или группа" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Тип проблемы</label>
-                        <select id="myCategory" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition">
-                            <option value="Оскорбления / Слова">Оскорбления / Слова</option>
-                            <option value="Физическое насилие">Физическое насилие</option>
-                            <option value="Кибербуллинг (в сети)">Кибербуллинг (в сети)</option>
-                            <option value="Игнорирование / Бойкот">Игнорирование / Бойкот</option>
-                            <option value="Порча вещей">Порча вещей</option>
-                            <option value="Другое">Другое</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Что произошло?</label>
-                        <textarea id="myDesc" rows="4" required placeholder="Опишите ситуацию..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition"></textarea>
-                    </div>
-                    <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md shadow-rose-200 transition">
-                        Отправить психологу конфиденциально
-                    </button>
-                </form>
-            </div>
-
-            <div class="bg-rose-500 text-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
-                <div>
-                    <h3 class="font-bold text-sm">Экстренная помощь</h3>
-                    <p class="text-xs text-rose-100">Звонки бесплатные 24/7</p>
-                </div>
-                <div class="flex space-x-2">
-                    <a href="tel:111" class="bg-white text-rose-600 font-bold px-3 py-2 rounded-xl text-xs shadow">111</a>
-                    <a href="tel:150" class="bg-white text-rose-600 font-bold px-3 py-2 rounded-xl text-xs shadow">150</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- КАБИНЕТ ПСИХОЛОГА -->
-        <div id="psychologistView" class="hidden space-y-6">
-            <div class="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900">Кабинет психолога</h2>
-                    <p class="text-sm text-slate-500">Журнал конфиденциальных обращений</p>
-                </div>
-                <button onclick="logoutPsychologist()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition">Выйти</button>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <span class="text-xs font-semibold uppercase text-slate-400">Всего заявок</span>
-                    <p id="statTotal" class="text-2xl font-bold text-slate-900 mt-1">0</p>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <span class="text-xs font-semibold uppercase text-amber-500">Частый обидчик</span>
-                    <p id="statBullies" class="text-sm font-bold text-slate-800 mt-2 truncate">—</p>
-                </div>
-            </div>
-
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
-                    <h3 class="font-bold text-slate-900">Журнал обращений</h3>
-                    <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold">
-                        <button onclick="setFilter('all')" id="filter-all" class="bg-slate-900 text-white px-3 py-1.5 rounded-lg border border-slate-900 transition">Все</button>
-                        <button onclick="setFilter('Новое')" id="filter-Новое" class="bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition">Новые</button>
-                        <button onclick="setFilter('В работе')" id="filter-В работе" class="bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition">В работе</button>
-                        <button onclick="setFilter('Встреча')" id="filter-Встреча" class="bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition">Встречи</button>
-                        <button onclick="setFilter('Решено')" id="filter-Решено" class="bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition">Решено</button>
-                    </div>
-                </div>
-                
-                <div id="reportsList" class="space-y-4">
-                    <p class="text-xs text-slate-400 text-center py-6">Загрузка данных...</p>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Модалки -->
-    <div id="loginModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white p-6 rounded-2xl max-w-sm w-full shadow-xl space-y-4">
-            <h3 class="font-bold text-lg text-slate-900">Вход для психолога</h3>
-            <input type="password" id="loginPassword" placeholder="Пароль..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500">
-            <div class="flex space-x-2">
-                <button onclick="closeLoginModal()" class="flex-1 bg-slate-100 text-slate-700 py-2.5 rounded-xl text-sm font-semibold">Отмена</button>
-                <button onclick="checkPassword()" class="flex-1 bg-rose-500 text-white py-2.5 rounded-xl text-sm font-semibold">Войти</button>
-            </div>
+    <!-- ШАПКА САЙТА -->
+    <div class="header">
+        <!-- ЗДЕСЬ ВСТАВЛЯЕМ ГЕРБ ПОЛИЦИИ (или МВД) -->
+        <!-- Ссылку на картинку (src) можно заменить на официальный герб РК или МВД -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Emblem_of_the_Ministry_of_Internal_Affairs_of_Kazakhstan.png/120px-Emblem_of_the_Ministry_of_Internal_Affairs_of_Kazakhstan.png" alt="Герб полиции" class="police-emblem">
+        
+        <div>
+            <div class="title">SafeSchool</div>
+            <div>Школьная служба доверия РК</div>
         </div>
     </div>
 
-    <div id="successModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white p-6 rounded-2xl max-w-sm w-full shadow-xl text-center space-y-3">
-            <div class="text-4xl">✅</div>
-            <h3 class="font-bold text-lg text-slate-900">Отправлено!</h3>
-            <p class="text-xs text-slate-600">Психолог уже видит ваше обращение.</p>
-            <button onclick="closeSuccessModal()" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-sm font-semibold">Понятно</button>
-        </div>
+    <!-- ДАЛЬШЕ ИДЕТ ВАША ФОРМА (как на фото) -->
+    <div class="form-container" style="padding: 20px; max-width: 800px; margin: 0 auto;">
+        <h3>Сообщить о ситуации</h3>
+        <!-- ... остальные поля формы ... -->
     </div>
 
-    <script>
-        const BIN_ID = "6af3158dffd5d16053b6a4ae"; 
-        const MASTER_KEY = "$2a$10$5OG8yAXzsTfGHDGr/POtMOcu6YnKqlOE1CCYpXFlgRCCiVp7AwWOe";
-        const API_URL = "https://api.jsonbin.io/v3/b/" + BIN_ID;
-        
-        let reports = [];
-        let isFetching = false;
-        let currentFilter = 'all';
-        let lastCount = 0; 
-        const PSYCHOLOGIST_PASSWORD = 'bagdagul';
-        
-        const notifSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-
-        function toggleTips() {
-            const content = document.getElementById('tipsContent');
-            const icon = document.getElementById('tipsIcon');
-            if (content.classList.contains('hidden')) {
-                content.classList.remove('hidden');
-                icon.style.transform = 'rotate(180deg)';
-            } else {
-                content.classList.add('hidden');
-                icon.style.transform = 'rotate(0deg)';
-            }
-        }
-
-        function setFilter(filter) {
-            currentFilter = filter;
-            document.querySelectorAll('[id^="filter-"]').forEach(btn => {
-                btn.className = 'bg-white text-slate-600 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition';
-            });
-            document.getElementById(`filter-${filter}`).className = 'bg-slate-900 text-white px-3 py-1.5 rounded-lg border border-slate-900 transition';
-            renderReports();
-        }
-
-        async function loadData() {
-            if (isFetching) return;
-            if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') return;
-            
-            isFetching = true;
-            try {
-                const res = await fetch(`${API_URL}/latest`, {
-                    headers: { 'X-Master-Key': MASTER_KEY, 'X-Bin-Meta': 'false' }
-                });
-                if (res.status === 429) { isFetching = false; return; }
-                if (!res.ok) throw new Error("Ошибка сети");
-                
-                const data = await res.json();
-                if (data && data.posts) {
-                    if (data.posts.length > lastCount && lastCount > 0) {
-                        notifSound.play().catch(e => console.log('Звук заблокирован'));
-                        document.getElementById('newBadge').classList.remove('hidden');
-                    }
-                    lastCount = data.posts.length;
-
-                    if (JSON.stringify(reports) !== JSON.stringify(data.posts)) {
-                        reports = data.posts;
-                        renderReports();
-                    }
-                } else {
-                    await saveData();
-                }
-            } catch (e) {
-                console.error("Ошибка загрузки:", e);
-            } finally {
-                isFetching = false;
-            }
-        }
-
-        async function saveData() {
-            try {
-                await fetch(API_URL, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
-                    body: JSON.stringify({ posts: reports })
-                });
-            } catch (e) {
-                console.error("Ошибка сохранения:", e);
-                alert("Ошибка соединения с базой.");
-            }
-        }
-
-        function openLoginModal() {
-            document.getElementById('loginModal').classList.remove('hidden');
-            document.getElementById('loginModal').classList.add('flex');
-            document.getElementById('newBadge').classList.add('hidden'); 
-        }
-        function closeLoginModal() {
-            document.getElementById('loginModal').classList.add('hidden');
-            document.getElementById('loginModal').classList.remove('flex');
-            document.getElementById('loginPassword').value = '';
-        }
-
-        function checkPassword() {
-            if (document.getElementById('loginPassword').value === PSYCHOLOGIST_PASSWORD) {
-                closeLoginModal();
-                showPsychologist();
-            } else {
-                alert('❌ Неверный пароль!');
-            }
-        }
-
-        function showPsychologist() {
-            document.getElementById('studentView').classList.add('hidden');
-            document.getElementById('psychologistView').classList.remove('hidden');
-            document.getElementById('roleToggleBtn').innerText = "📱 Ученик";
-            document.getElementById('roleToggleBtn').setAttribute('onclick', 'switchToStudent()');
-            setFilter('all'); 
-        }
-
-        function switchToStudent() {
-            document.getElementById('psychologistView').classList.add('hidden');
-            document.getElementById('studentView').classList.remove('hidden');
-            document.getElementById('roleToggleBtn').innerHTML = "👩‍⚕️ Психолог" + document.getElementById('newBadge').outerHTML;
-            document.getElementById('roleToggleBtn').setAttribute('onclick', 'openLoginModal()');
-        }
-
-        function logoutPsychologist() { switchToStudent(); }
-
-        async function submitReport(e) {
-            e.preventDefault();
-            const newReport = {
-                id: Date.now(),
-                name: document.getElementById('myName').value,
-                class: document.getElementById('myClass').value,
-                category: document.getElementById('myCategory').value,
-                bully: document.getElementById('bullyName').value,
-                desc: document.getElementById('myDesc').value,
-                status: "Новое",
-                date: new Date().toLocaleDateString('ru-RU'),
-                comment: ""
-            };
-            reports.unshift(newReport); 
-            renderReports(); 
-            await saveData(); 
-            
-            document.getElementById('reportForm').reset();
-            document.getElementById('successModal').classList.remove('hidden');
-            document.getElementById('successModal').classList.add('flex');
-        }
-
-        function closeSuccessModal() {
-            document.getElementById('successModal').classList.add('hidden');
-            document.getElementById('successModal').classList.remove('flex');
-        }
-
-        function updateStatus(id, newStatus) {
-            const report = reports.find(r => r.id === id);
-            if (report) {
-                report.status = newStatus;
-                renderReports(); 
-                saveData(); 
-            }
-        }
-
-        async function deleteReport(id) {
-            if (confirm('⚠️ Вы уверены, что хотите БЕЗВОЗВРАТНО удалить эту заявку?')) {
-                reports = reports.filter(r => r.id !== id); 
-                renderReports(); 
-                await saveData(); 
-                lastCount = reports.length; 
-            }
-        }
-
-        function saveComment(id) {
-            const text = document.getElementById(`comment-${id}`).value.trim();
-            const report = reports.find(r => r.id === id);
-            if (report) {
-                report.comment = text;
-                alert('✅ Заметка сохранена!');
-                saveData();
-            }
-        }
-
-        function statusClass(status) {
-            if (status === 'Шутка / Ложный') return 'bg-red-100 text-red-700 border-red-200';
-            if (status === 'В работе') return 'bg-amber-100 text-amber-700 border-amber-200';
-            if (status === 'Решено') return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-            if (status === 'Встреча') return 'bg-purple-100 text-purple-700 border-purple-200';
-            return 'bg-blue-100 text-blue-700 border-blue-200';
-        }
-
-        function renderReports() {
-            const listContainer = document.getElementById('reportsList');
-            document.getElementById('statTotal').innerText = reports.length;
-
-            const filtered = reports.filter(r => currentFilter === 'all' || r.status === currentFilter);
-
-            if (filtered.length === 0) {
-                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">По этому фильтру обращений нет.</p>`;
-            } else {
-                listContainer.innerHTML = filtered.map(r => `
-                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 shadow-sm">
-                        <div class="flex items-center justify-between flex-wrap gap-2">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="text-sm font-bold text-slate-900">${r.name}</span>
-                                <span class="text-[11px] text-slate-500 bg-slate-200 px-2 py-0.5 rounded">${r.class}</span>
-                                <span class="text-[10px] text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded font-semibold">${r.category || 'Другое'}</span>
-                                <span class="text-[10px] text-slate-400">${r.date}</span>
-                            </div>
-                            <span class="text-xs px-2.5 py-1 rounded-full font-semibold border ${statusClass(r.status)}">${r.status}</span>
-                        </div>
-                        
-                        <p class="text-xs text-slate-600"><b>Обидчик:</b> ${r.bully}</p>
-                        <p class="text-sm text-slate-800 bg-white p-3 rounded-lg border border-slate-200">${r.desc}</p>
-                        
-                        <div class="flex items-center flex-wrap gap-2 pt-1 border-b border-slate-200 pb-3">
-                            <button onclick="updateStatus(${r.id}, 'Новое')" class="text-[11px] bg-white border border-slate-300 px-2.5 py-1 rounded-lg hover:bg-slate-100 font-medium">🆕 Новое</button>
-                            <button onclick="updateStatus(${r.id}, 'В работе')" class="text-[11px] bg-amber-50 text-amber-700 border border-amber-300 px-2.5 py-1 rounded-lg hover:bg-amber-100 font-medium">⚙️ В работу</button>
-                            <button onclick="updateStatus(${r.id}, 'Встреча')" class="text-[11px] bg-purple-50 text-purple-700 border border-purple-300 px-2.5 py-1 rounded-lg hover:bg-purple-100 font-medium">📅 Встреча</button>
-                            <button onclick="updateStatus(${r.id}, 'Решено')" class="text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-300 px-2.5 py-1 rounded-lg hover:bg-emerald-100 font-medium">✅ Решено</button>
-                            <button onclick="updateStatus(${r.id}, 'Шутка / Ложный')" class="text-[11px] bg-rose-50 text-rose-600 border border-rose-300 px-2.5 py-1 rounded-lg hover:bg-rose-100 font-medium">⚠️ Ложный</button>
-                            
-                            <button onclick="deleteReport(${r.id})" class="text-[11px] bg-red-600 text-white border border-red-700 px-2.5 py-1 rounded-lg hover:bg-red-700 font-medium ml-auto transition">🗑️ Удалить</button>
-                        </div>
-
-                        <div class="pt-1">
-                            <label class="block text-[10px] font-bold uppercase text-indigo-500 mb-1">📝 Заметка психолога</label>
-                            <div class="flex flex-col sm:flex-row gap-2">
-                                <textarea id="comment-${r.id}" rows="1" placeholder="Например: Встреча в 14:00, каб. 12..." class="w-full px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg text-xs focus:outline-none focus:border-indigo-400">${r.comment || ''}</textarea>
-                                <button onclick="saveComment(${r.id})" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">💾 Сохранить</button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            if (reports.length > 0) {
-                const bulliesCount = {};
-                reports.forEach(r => {
-                    if (r.bully && r.bully !== '—') bulliesCount[r.bully] = (bulliesCount[r.bully] || 0) + 1;
-                });
-                const topBully = Object.keys(bulliesCount).sort((a,b) => bulliesCount[b]-bulliesCount[a])[0] || '—';
-                document.getElementById('statBullies').innerText = topBully;
-            } else {
-                document.getElementById('statBullies').innerText = "—";
-            }
-        }
-
-        loadData();
-        setInterval(loadData, 15000); 
-    </script>
 </body>
 </html>
