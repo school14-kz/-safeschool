@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeSchool Казахстан — Служба доверия</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+            <div class="flex items-center space-x-3">
+                <div class="bg-rose-500 text-white p-2 rounded-xl font-bold text-lg shadow-sm">🛡️</div>
+                <div>
+                    <h1 class="font-bold text-slate-900 leading-tight">SafeSchool</h1>
+                    <p class="text-xs text-slate-500">Школьная служба доверия РК</p>
+                </div>
+            </div>
+            <div>
+                <button id="roleToggleBtn" onclick="openLoginModal()" class="text-xs bg-rose-50 text-rose-600 border border-rose-200 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-100 transition">👩‍⚕️ Психолог</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-xl md:max-w-4xl mx-auto w-full p-4 md:py-8">
+
+        <!-- СТРАНИЦА УЧЕНИКА -->
+        <div id="studentView" class="space-y-6">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <div class="flex items-center space-x-2 text-rose-600 font-semibold text-sm">
+                    <span>🔒</span>
+                    <span>Полная конфиденциальность</span>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Обязательно укажите свое имя и класс! Не переживайте: <b>ваше имя никто не видит, кроме школьного психолога</b>. Ни одноклассники, ни те, кто вас обижает, никогда не узнают, кто отправил жалобу.
+                </p>
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-start space-x-2 text-xs text-amber-800">
+                    <span class="text-base">⚠️</span>
+                    <span><b>Внимание: Не пишите в шутку!</b> Ложные доносы и фейковые заявки караются законом Республики Казахстан и школьным уставом.</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-900 mb-4">Сообщить о ситуации</h2>
+                <form id="reportForm" onsubmit="submitReport(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Ваше имя и фамилия</label>
+                        <input type="text" id="myName" required placeholder="Например: Алишер Каримов" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition">
+                        <p class="text-[11px] text-rose-500 mt-1">🔒 Видит только психолог!</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Ваш класс</label>
+                            <input type="text" id="myClass" required placeholder="8 «Б»" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Кто обижает</label>
+                            <input type="text" id="bullyName" required placeholder="Имя или группа" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Что произошло?</label>
+                        <textarea id="myDesc" rows="4" required placeholder="Опишите ситуацию..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md shadow-rose-200 transition">
+                        Отправить психологу конфиденциально
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-rose-500 text-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-sm">Экстренная помощь</h3>
+                    <p class="text-xs text-rose-100">Звонки бесплатные 24/7</p>
+                </div>
+                <div class="flex space-x-2">
+                    <a href="tel:111" class="bg-white text-rose-600 font-bold px-3 py-2 rounded-xl text-xs shadow">111</a>
+                    <a href="tel:150" class="bg-white text-rose-600 font-bold px-3 py-2 rounded-xl text-xs shadow">150</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- КАБИНЕТ ПСИХОЛОГА -->
+        <div id="psychologistView" class="hidden space-y-6">
+            <div class="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Кабинет психолога</h2>
+                    <p class="text-sm text-slate-500">Журнал конфиденциальных обращений</p>
+                </div>
+                <button onclick="logoutPsychologist()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition">Выйти</button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-xs font-semibold uppercase text-slate-400">Всего заявок</span>
+                    <p id="statTotal" class="text-2xl font-bold text-slate-900 mt-1">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-xs font-semibold uppercase text-amber-500">Частый обидчик</span>
+                    <p id="statBullies" class="text-sm font-bold text-slate-800 mt-2 truncate">—</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-900 mb-4">Журнал обращений</h3>
+                <div id="reportsList" class="space-y-3">
+                    <p class="text-xs text-slate-400 text-center py-6">Загрузка данных...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модалки -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-6 rounded-2xl max-w-sm w-full shadow-xl space-y-4">
+            <h3 class="font-bold text-lg text-slate-900">Вход для психолога</h3>
+            <input type="password" id="loginPassword" placeholder="Пароль..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-rose-500">
+            <div class="flex space-x-2">
+                <button onclick="closeLoginModal()" class="flex-1 bg-slate-100 text-slate-700 py-2.5 rounded-xl text-sm font-semibold">Отмена</button>
+                <button onclick="checkPassword()" class="flex-1 bg-rose-500 text-white py-2.5 rounded-xl text-sm font-semibold">Войти</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="successModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-6 rounded-2xl max-w-sm w-full shadow-xl text-center space-y-3">
+            <div class="text-4xl">✅</div>
+            <h3 class="font-bold text-lg text-slate-900">Отправлено!</h3>
+            <p class="text-xs text-slate-600">Психолог уже видит ваше обращение.</p>
+            <button onclick="closeSuccessModal()" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-sm font-semibold">Понятно</button>
+        </div>
+    </div>
+
+    <script>
+        // ТВОИ КЛЮЧИ УЖЕ ВСТАВЛЕНЫ СЮДА
+        const BIN_ID = "6af3158dffd5d16053b6a4ae"; 
+        const MASTER_KEY = "$2a$10$5OG8yAXzsTfGHDGr/POtMOcu6YnKqlOE1CCYpXFlgRCCiVp7AwWOe";
+        
+        const API_URL = "https://api.jsonbin.io/v3/b/" + BIN_ID;
+        let reports = [];
+        let isFetching = false;
+        const PSYCHOLOGIST_PASSWORD = 'bagdagul'; // Пароль для входа
+
+        async function loadData() {
+            if (isFetching) return;
+            isFetching = true;
+            try {
+                const res = await fetch(`${API_URL}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY, 'X-Bin-Meta': 'false' }
+                });
+                if (res.status === 429) { isFetching = false; return; }
+                if (!res.ok) throw new Error("Ошибка сети");
+                
+                const data = await res.json();
+                if (data && data.posts) {
+                    reports = data.posts;
+                    renderReports();
+                } else {
+                    await saveData();
+                }
+            } catch (e) {
+                console.error("Ошибка загрузки:", e);
+            } finally {
+                isFetching = false;
+            }
+        }
+
+        async function saveData() {
+            try {
+                await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
+                    body: JSON.stringify({ posts: reports })
+                });
+                loadData();
+            } catch (e) {
+                console.error("Ошибка сохранения:", e);
+                alert("Ошибка соединения. Попробуйте еще раз.");
+            }
+        }
+
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('loginModal').classList.add('flex');
+        }
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('flex');
+            document.getElementById('loginPassword').value = '';
+        }
+
+        function checkPassword() {
+            if (document.getElementById('loginPassword').value === PSYCHOLOGIST_PASSWORD) {
+                closeLoginModal();
+                showPsychologist();
+            } else {
+                alert('❌ Неверный пароль!');
+            }
+        }
+
+        function showPsychologist() {
+            document.getElementById('studentView').classList.add('hidden');
+            document.getElementById('psychologistView').classList.remove('hidden');
+            document.getElementById('roleToggleBtn').innerText = "📱 Ученик";
+            document.getElementById('roleToggleBtn').setAttribute('onclick', 'switchToStudent()');
+            renderReports();
+        }
+
+        function switchToStudent() {
+            document.getElementById('psychologistView').classList.add('hidden');
+            document.getElementById('studentView').classList.remove('hidden');
+            document.getElementById('roleToggleBtn').innerText = "👩‍⚕️ Психолог";
+            document.getElementById('roleToggleBtn').setAttribute('onclick', 'openLoginModal()');
+        }
+
+        function logoutPsychologist() { switchToStudent(); }
+
+        async function submitReport(e) {
+            e.preventDefault();
+            const newReport = {
+                id: Date.now(),
+                name: document.getElementById('myName').value,
+                class: document.getElementById('myClass').value,
+                bully: document.getElementById('bullyName').value,
+                desc: document.getElementById('myDesc').value,
+                status: "Новое",
+                date: new Date().toLocaleDateString('ru-RU')
+            };
+            reports.unshift(newReport); 
+            await saveData(); 
+            document.getElementById('reportForm').reset();
+            document.getElementById('successModal').classList.remove('hidden');
+            document.getElementById('successModal').classList.add('flex');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('successModal').classList.remove('flex');
+        }
+
+        async function updateStatus(id, newStatus) {
+            reports = reports.map(r => r.id === id ? {...r, status: newStatus} : r);
+            await saveData();
+        }
+
+        function statusClass(status) {
+            if (status === 'Шутка / Ложный') return 'bg-red-100 text-red-700';
+            if (status === 'В работе') return 'bg-amber-100 text-amber-700';
+            if (status === 'Решено') return 'bg-emerald-100 text-emerald-700';
+            return 'bg-blue-100 text-blue-700';
+        }
+
+        function renderReports() {
+            const listContainer = document.getElementById('reportsList');
+            document.getElementById('statTotal').innerText = reports.length;
+
+            if (reports.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Пока нет обращений.</p>`;
+                document.getElementById('statBullies').innerText = "—";
+                return;
+            }
+
+            const bulliesCount = {};
+            reports.forEach(r => {
+                if (r.bully && r.bully !== '—') bulliesCount[r.bully] = (bulliesCount[r.bully] || 0) + 1;
+            });
+            const topBully = Object.keys(bulliesCount).sort((a,b) => bulliesCount[b]-bulliesCount[a])[0] || '—';
+            document.getElementById('statBullies').innerText = topBully;
+
+            listContainer.innerHTML = reports.map(r => `
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-900">${r.name}</span>
+                            <span class="text-[11px] text-slate-400">· ${r.class}</span>
+                            <span class="text-[10px] text-slate-400">· ${r.date}</span>
+                        </div>
+                        <span class="text-xs px-2.5 py-1 rounded-full font-semibold ${statusClass(r.status)}">${r.status}</span>
+                    </div>
+                    <p class="text-xs text-slate-600"><b>Обидчик:</b> ${r.bully}</p>
+                    <p class="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-slate-100">${r.desc}</p>
+                    <div class="flex items-center flex-wrap gap-2 pt-1">
+                        <button onclick="updateStatus(${r.id}, 'Новое')" class="text-[11px] bg-white border border-slate-200 px-2.5 py-1 rounded-lg">🆕 Новое</button>
+                        <button onclick="updateStatus(${r.id}, 'В работе')" class="text-[11px] bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg">⚙️ В работу</button>
+                        <button onclick="updateStatus(${r.id}, 'Решено')" class="text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg">✅ Решено</button>
+                        <button onclick="updateStatus(${r.id}, 'Шутка / Ложный')" class="text-[11px] bg-rose-50 text-rose-600 border border-rose-200 px-2.5 py-1 rounded-lg">⚠️ Ложный</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        loadData();
+        setInterval(loadData, 15000); 
+    </script>
+</body>
+</html>
