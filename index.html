@@ -197,44 +197,33 @@
         let lastCount = 0; 
         const PSYCHOLOGIST_PASSWORD = 'bagdagul';
 
-        // --- НОВАЯ СИСТЕМА ЗВУКА (Web Audio API) ---
+        // --- СИСТЕМА ЗВУКА ---
         let audioCtx;
-
-        // Разблокировка звука при первом клике по сайту
         document.body.addEventListener('click', function unlockAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
         }, { once: true });
 
         function playNotificationSound() {
-            if (!audioCtx) return; // Если звук еще не разблокирован, пропускаем
+            if (!audioCtx) return; 
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
-            // Генерируем громкий звук (два пика)
             for(let i=0; i<2; i++) {
                 setTimeout(() => {
                     const oscillator = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
-                    
-                    oscillator.type = 'square'; // Более резкий и громкий звук
-                    oscillator.frequency.value = 880; // Частота (нота Ля)
-                    
-                    gainNode.gain.setValueAtTime(1, audioCtx.currentTime); // Максимальная громкость
+                    oscillator.type = 'square'; 
+                    oscillator.frequency.value = 880; 
+                    gainNode.gain.setValueAtTime(1, audioCtx.currentTime); 
                     gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-                    
                     oscillator.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
-                    
                     oscillator.start();
                     oscillator.stop(audioCtx.currentTime + 0.5);
-                }, i * 600); // Задержка между пиками
+                }, i * 600); 
             }
         }
-        // ------------------------------------------
+        // ---------------------
 
         function toggleTips() {
             const content = document.getElementById('tipsContent');
@@ -271,9 +260,12 @@
                 
                 const data = await res.json();
                 if (data && data.posts) {
+                    // ВАЖНО: Звук и бейдж только для ПСИХОЛОГА
                     if (data.posts.length > lastCount && lastCount > 0) {
-                        playNotificationSound(); // Включаем звук
-                        document.getElementById('newBadge').classList.remove('hidden');
+                        if (localStorage.getItem('safe_school_psychologist') === 'true') {
+                            playNotificationSound();
+                            document.getElementById('newBadge').classList.remove('hidden');
+                        }
                     }
                     lastCount = data.posts.length;
 
@@ -482,7 +474,9 @@
                 showPsychologist();
             }
         };
-        setInterval(loadData, 15000); 
+        
+        // УСКОРЕНО: Обновляем каждые 3 секунды (вместо 15)
+        setInterval(loadData, 3000); 
     </script>
 </body>
 </html>
