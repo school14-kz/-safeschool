@@ -240,13 +240,13 @@
     </div>
 
     <script>
-        // ВНИМАНИЕ: Проверь ключи! Если они не совпадают с твоими в JSONBin, сообщения не будут приходить.
         const BIN_ID = "6af3158dffd5d16053b6a4ae"; 
         const MASTER_KEY = "$2a$10$5OG8yAXzsTfGHDGr/POtMOcu6YnKqlOE1CCYpXlRCCiVp7AwWOe";
         const API_URL = "https://api.jsonbin.io/v3/b/" + BIN_ID;
         
         let reports = [];
         let isFetching = false;
+        let isSaving = false; // НОВЫЙ ФЛАГ: Защита от перезаписи при сохранении
         let currentFilter = 'active';
         let lastCount = 0; 
         const PSYCHOLOGIST_PASSWORD = 'bagdagul';
@@ -392,20 +392,17 @@
             renderReports();
         }
 
-        // ГЛАВНАЯ ФУНКЦИЯ ПОЛУЧЕНИЯ ДАННЫХ (ИСПРАВЛЕНА ОШИБКА КЭША)
+        // ГЛАВНАЯ ФУНКЦИЯ ПОЛУЧЕНИЯ ДАННЫХ
         async function loadData() {
-            if (isFetching) return;
-            // Если пользователь печатает, не обновляем экран
+            // БЛОКИРУЕМ ЗАГРУЗКУ, ЕСЛИ СЕЙЧАС ИДЕТ СОХРАНЕНИЕ
+            if (isFetching || isSaving) return;
+            
             if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') return;
             
             isFetching = true;
             try {
-                // Добавляем ?t=Date.now(), чтобы браузер не кэшировал запрос
                 const res = await fetch(`${API_URL}/latest?t=${Date.now()}`, { 
-                    headers: { 
-                        'X-Master-Key': MASTER_KEY, 
-                        'X-Bin-Meta': 'false'
-                    } 
+                    headers: { 'X-Master-Key': MASTER_KEY, 'X-Bin-Meta': 'false' } 
                 });
                 
                 if (res.status === 429) { isFetching = false; return; }
@@ -414,16 +411,13 @@
                 const data = await res.json();
                 
                 if (data && data.posts) {
-                    // Проверяем, есть ли новые сообщения
                     if (data.posts.length > lastCount && lastCount > 0) {
-                        // Показываем красную точку на кнопке "Психолог", если мы на странице ученика
                         if (localStorage.getItem('safe_school_psychologist') === 'true') {
                             document.getElementById('newBadge').classList.remove('hidden');
                         }
                     }
                     lastCount = data.posts.length;
                     
-                    // Обновляем экран, только если данные реально изменились
                     if (JSON.stringify(reports) !== JSON.stringify(data.posts)) {
                         reports = data.posts;
                         renderReports(); 
@@ -431,7 +425,6 @@
                         updateChart();
                     }
                 } else if (data === null || data === undefined) {
-                     // Если база пуста, создаем структуру
                      await saveData();
                 }
             } catch (e) { 
@@ -443,23 +436,30 @@
 
         // ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ
         function forceReload() {
+            isSaving = false; // Сбрасываем блокировку
             loadData();
             alert('🔄 Данные обновлены!');
         }
 
-        // СОХРАНЕНИЕ ДАННЫХ
+        // СОХРАНЕНИЕ ДАННЫХ (С ЗАЩИТОЙ)
         async function saveData() {
+            isSaving = true; // Включаем защиту от автообновления
             try {
-                await fetch(API_URL, {
+                const res = await fetch(API_URL, {
                     method: 'PUT', 
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'X-Master-Key': MASTER_KEY 
-                    },
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
                     body: JSON.stringify({ posts: reports })
                 });
+                if (!res.ok) throw new Error("Ошибка сохранения");
+                
+                // Даем серверу 1.5 секунды, чтобы он обновил кэш
+                setTimeout(() => { isSaving = false; }, 1500);
+                return true;
             } catch (e) { 
+                console.error(e);
                 alert("Ошибка сохранения на сервер. Проверьте интернет."); 
+                isSaving = false;
+                return false;
             }
         }
 
@@ -485,7 +485,7 @@
             localStorage.setItem('safe_school_psychologist', 'true');
             localStorage.setItem('safe_school_view', 'psychologist');
             updateChart();
-            loadData(); // Сразу обновляем при входе
+            loadData(); 
         }
 
         function switchToStudent() {
@@ -545,7 +545,6 @@
             myReportIds.push(newReport.id); 
             localStorage.setItem('safe_school_my_reports', JSON.stringify(myReportIds));
             
-            // СРАЗУ СОХРАНЯЕМ В ОБЛАКО
             await saveData(); 
             
             renderReports(); 
@@ -583,14 +582,28 @@
             }
         }
 
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ УДАЛЕНИЯ
         async function deleteReport(id) {
-            if (confirm('Удалить заявку?')) {
-                reports = reports.filter(r => r.id !== id); 
-                renderReports(); 
-                renderMyTickets(); 
-                updateChart(); 
-                await saveData(); 
-                lastCount = reports.length; 
+            if (!confirm('⚠️ Вы уверены, что хотите удалить эту заявку?')) return;
+            
+            const backupReports = [...reports]; // Сохраняем копию на случай ошибки
+            
+            // Мгновенно удаляем с экрана
+            reports = reports.filter(r => String(r.id) !== String(id)); 
+            renderReports(); 
+            renderMyTickets(); 
+            updateChart(); 
+            
+            // Отправляем в облако (ждем завершения)
+            const success = await saveData();
+            
+            if (success) {
+                lastCount = reports.length;
+            } else {
+                // Если интернет отвалился, возвращаем заявку обратно
+                reports = backupReports;
+                renderReports(); renderMyTickets(); updateChart();
+                alert("Не удалось удалить заявку. Проверьте интернет.");
             }
         }
 
