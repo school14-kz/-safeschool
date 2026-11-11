@@ -13,6 +13,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        .student-reply-highlight { animation: pulse-green 2s infinite; }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 min-h-screen flex flex-col">
@@ -36,7 +38,6 @@
                     <span id="themeIcon">🌙</span>
                 </button>
 
-                <!-- Кнопка Входа/Возврата -->
                 <button id="roleToggleBtn" onclick="openLoginModal()" class="relative text-xs bg-rose-50 text-rose-600 border border-rose-200 dark:bg-slate-700 dark:text-rose-400 dark:border-slate-600 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-slate-600 transition">
                     <span id="btnText">👩‍⚕️ Психолог</span>
                     <span id="newBadge" class="hidden absolute -top-1 -right-1 flex h-3 w-3">
@@ -58,7 +59,9 @@
                 <button onclick="showPsychologist()" class="text-xs bg-purple-600 text-white font-bold px-3 py-1.5 rounded-lg hover:bg-purple-700 transition">🔙 В кабинет</button>
             </div>
             
-            <div id="myTicketsSection" class="hidden bg-white dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-2xl p-5 shadow-sm transition-colors">
+            <!-- Блок Мои Сообщения -->
+            <div id="myTicketsSection" class="hidden bg-white dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-2xl p-5 shadow-sm transition-colors relative">
+                <div id="newReplyBadge" class="hidden absolute -top-3 -right-2 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg animate-bounce">🔔 Новый ответ!</div>
                 <div class="flex items-center justify-between mb-3">
                     <h2 class="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
                         <span>📌</span> Мои сообщения
@@ -239,7 +242,7 @@
 
     <script>
         const BIN_ID = "6af3158dffd5d16053b6a4ae"; 
-        const MASTER_KEY = "$2a$10$5OG8yAXzsTfGHDGr/POtMOcu6YnKqlOE1CCYpXFlgRCCiVp7AwWOe";
+        const MASTER_KEY = "$2a$10$5OG8yAXzsTfGHDGr/POtMOcu6YnKqlOE1CCYpXlRCCiVp7AwWOe";
         const API_URL = "https://api.jsonbin.io/v3/b/" + BIN_ID;
         
         let reports = [];
@@ -249,14 +252,15 @@
         const PSYCHOLOGIST_PASSWORD = 'bagdagul';
         let myReportIds = JSON.parse(localStorage.getItem('safe_school_my_reports')) || [];
         let statsChartInstance = null;
+        
+        // Для отслеживания непрочитанных ответов
+        let lastSeenReplyTime = localStorage.getItem('safe_school_last_reply') || '0';
 
-        // Вспомогательная функция для кнопки входа
         function setHeaderButton(text, onclickFunc) {
             document.getElementById('btnText').innerText = text;
             document.getElementById('roleToggleBtn').onclick = onclickFunc;
         }
 
-        // Показать/скрыть пароль
         function togglePasswordVisibility() {
             const input = document.getElementById('loginPassword');
             input.type = input.type === 'password' ? 'text' : 'password';
@@ -341,16 +345,26 @@
             if (report.status === 'В работе') { statusText = "Психолог работает"; statusColor = "text-blue-600"; }
             if (report.status === 'Встреча') { statusText = "Назначена встреча"; statusColor = "text-purple-600"; }
             if (report.status === 'Решено') { statusText = "Вопрос решен"; statusColor = "text-emerald-600"; }
+            
             let html = `
                 <div class="border-b border-slate-200 dark:border-slate-600 pb-2 mb-2 flex justify-between items-start">
                     <div><p class="text-[10px] uppercase text-slate-500">Статус:</p><p class="text-xs font-bold ${statusColor}">${statusText}</p></div>
                     <span class="text-[10px] bg-slate-100 dark:bg-slate-600 px-2 py-1 rounded">${report.date}</span>
                 </div>`;
+            
             if (report.meetingTime) html += `<p class="text-xs text-purple-600 font-bold mb-2">📅 Встреча: ${formatMeetingTime(report.meetingTime)}</p>`;
+            
+            // ВЫВОД ОТВЕТА ПСИХОЛОГА (СДЕЛАНО ЯРКО)
             if (report.replyToStudent) {
-                html += `<div><p class="text-[10px] uppercase text-slate-500 mb-1">Ответ психолога:</p><p class="text-xs text-slate-800 dark:text-white bg-indigo-50 dark:bg-slate-800 p-2 rounded-lg">${report.replyToStudent}</p></div>`;
+                html += `
+                <div class="mt-2 bg-white dark:bg-slate-800 border-2 border-emerald-400 dark:border-emerald-600 p-3 rounded-lg shadow-sm">
+                    <p class="text-[10px] font-bold uppercase text-emerald-600 mb-1 flex items-center gap-1">
+                        <span>💬</span> Ответ психолога:
+                    </p>
+                    <p class="text-sm font-medium text-slate-800 dark:text-slate-100">${report.replyToStudent}</p>
+                </div>`;
             } else {
-                html += `<p class="text-[10px] text-slate-400 text-center italic mt-1">Ожидайте ответа психолога...</p>`;
+                html += `<p class="text-[10px] text-slate-400 text-center italic mt-2">Ожидайте ответа психолога...</p>`;
             }
             return html;
         }
@@ -358,16 +372,35 @@
         function renderMyTickets() {
             const section = document.getElementById('myTicketsSection'), list = document.getElementById('myTicketsList');
             const myReports = reports.filter(r => myReportIds.includes(r.id));
+            
             if (myReports.length === 0) { section.classList.add('hidden'); return; }
             section.classList.remove('hidden');
-            list.innerHTML = myReports.map(r => `
-                <div class="bg-emerald-50 dark:bg-slate-700/50 p-3 rounded-xl border border-emerald-100 dark:border-slate-600 space-y-2">
+            
+            // Проверка на новый ответ
+            let hasNewReply = false;
+            
+            list.innerHTML = myReports.map(r => {
+                // Если есть ответ и его время больше последнего просмотренного — это новый ответ
+                if (r.replyToStudent && r.id > parseInt(lastSeenReplyTime)) {
+                    hasNewReply = true;
+                }
+                
+                return `
+                <div class="bg-emerald-50 dark:bg-slate-700/50 p-3 rounded-xl border ${r.replyToStudent ? 'border-emerald-400 dark:border-emerald-600 student-reply-highlight' : 'border-emerald-100 dark:border-slate-600'} space-y-2 relative">
                     <div class="flex justify-between items-center">
                         <span class="text-[10px] font-bold text-slate-500 uppercase">Обращение от ${r.date}</span>
                         <span class="text-[10px] font-bold text-emerald-700">${r.category}</span>
                     </div>
                     ${generateStudentTicketHTML(r)}
-                </div>`).join('');
+                </div>`;
+            }).join('');
+            
+            // Показываем красный бейдж "Новый ответ", если он есть
+            if (hasNewReply) {
+                document.getElementById('newReplyBadge').classList.remove('hidden');
+            } else {
+                document.getElementById('newReplyBadge').classList.add('hidden');
+            }
         }
 
         // --- ЛОГИКА ---
@@ -438,7 +471,6 @@
             document.getElementById('sosBtn').classList.add('hidden');
             document.getElementById('previewBanner').classList.add('hidden');
             
-            // Меняем кнопку на "Ученик" и привязываем правильную функцию
             setHeaderButton("📱 Ученик", switchToStudent);
             
             setFilter('active'); 
@@ -456,12 +488,25 @@
             
             if (isPsychologist) {
                 document.getElementById('previewBanner').classList.remove('hidden');
-                setHeaderButton("🔙 В кабинет", showPsychologist); // Привязываем функцию showPsychologist
+                setHeaderButton("🔙 В кабинет", showPsychologist); 
                 localStorage.setItem('safe_school_view', 'student');
             } else {
                 document.getElementById('previewBanner').classList.add('hidden');
-                setHeaderButton("👩‍⚕️ Психолог", openLoginModal); // Привязываем функцию openLoginModal
+                setHeaderButton("👩‍⚕️ Психолог", openLoginModal); 
+                
+                // АВТО-СКРОЛЛ: Если есть ответы, плавно опускаем ученика к "Мои сообщения"
+                const myReports = reports.filter(r => myReportIds.includes(r.id));
+                const hasReplies = myReports.some(r => r.replyToStudent);
+                if (hasReplies) {
+                    setTimeout(() => {
+                        document.getElementById('myTicketsSection').scrollIntoView({ behavior: 'smooth' });
+                    }, 500);
+                }
             }
+            
+            // Запоминаем, что ученик прочитал ответы
+            localStorage.setItem('safe_school_last_reply', Date.now().toString());
+            document.getElementById('newReplyBadge').classList.add('hidden');
         }
 
         function logoutPsychologist() {
@@ -509,7 +554,18 @@
         }
 
         function saveComment(id) { const text = document.getElementById(`comment-${id}`).value.trim(); const report = reports.find(r => r.id === id); if (report) { report.comment = text; alert('Заметка сохранена'); saveData(); } }
-        function saveReply(id) { const text = document.getElementById(`reply-${id}`).value.trim(); const report = reports.find(r => r.id === id); if (report) { report.replyToStudent = text; alert('Ответ отправлен ученику'); renderMyTickets(); saveData(); } }
+        
+        // СОХРАНЕНИЕ ОТВЕТА УЧЕНИКУ
+        function saveReply(id) { 
+            const text = document.getElementById(`reply-${id}`).value.trim(); 
+            const report = reports.find(r => r.id === id); 
+            if (report) { 
+                report.replyToStudent = text; 
+                alert('✅ Ответ отправлен ученику!'); 
+                renderMyTickets(); 
+                saveData(); 
+            } 
+        }
 
         function statusClass(status) {
             if (status === 'Шутка / Ложный') return 'bg-red-100 text-red-700 border-red-200';
@@ -575,23 +631,24 @@
 
                         <div class="pt-1 space-y-3">
                             <div>
-                                <label class="block text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400 mb-1">💬 Ответ ученику</label>
+                                <!-- ЧЕТКАЯ ПОДПИСЬ, ЧТО УВИДИТ УЧЕНИК -->
+                                <label class="block text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400 mb-1">💬 Ответ ученику (ученик увидит это)</label>
                                 <div class="flex flex-wrap gap-1.5 mb-2">
                                     <button onclick="applyQuickReply(${r.id}, 'Здравствуйте. Я получил(а) вашу жалобу, разбираюсь в ситуации.')" class="text-[10px] bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-md hover:bg-slate-200 transition">Принято</button>
                                     <button onclick="applyQuickReply(${r.id}, 'Жду тебя в своем кабинете на большой перемене.')" class="text-[10px] bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-md hover:bg-slate-200 transition">Жду в кабинете</button>
                                     <button onclick="applyQuickReply(${r.id}, 'Спасибо за доверие. Я свяжусь с твоим классным руководителем.')" class="text-[10px] bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-md hover:bg-slate-200 transition">Свяжусь с учителем</button>
                                 </div>
                                 <div class="flex flex-col sm:flex-row gap-2">
-                                    <textarea id="reply-${r.id}" rows="1" placeholder="Например: Жду тебя завтра в 14:00..." class="w-full px-3 py-2 bg-emerald-50 dark:bg-slate-800 border border-emerald-200 dark:border-slate-600 rounded-lg text-xs text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500">${r.replyToStudent || ''}</textarea>
-                                    <button onclick="saveReply(${r.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">📤 Ответить</button>
+                                    <textarea id="reply-${r.id}" rows="1" placeholder="Например: Жду тебя завтра в 14:00..." class="w-full px-3 py-2 bg-emerald-50 dark:bg-slate-800 border-2 border-emerald-300 dark:border-emerald-700 rounded-lg text-xs text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500">${r.replyToStudent || ''}</textarea>
+                                    <button onclick="saveReply(${r.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">📤 Отправить</button>
                                 </div>
                             </div>
                             
                             <div>
-                                <label class="block text-[10px] font-bold uppercase text-indigo-500 dark:text-indigo-400 mb-1">📝 Заметка (только для психолога)</label>
+                                <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">📝 Заметка (ТОЛЬКО для психолога)</label>
                                 <div class="flex flex-col sm:flex-row gap-2">
-                                    <textarea id="comment-${r.id}" rows="1" placeholder="Заметки для себя..." class="w-full px-3 py-2 bg-indigo-50 dark:bg-slate-800 border border-indigo-100 dark:border-slate-600 rounded-lg text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-400">${r.comment || ''}</textarea>
-                                    <button onclick="saveComment(${r.id})" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">💾 Сохранить</button>
+                                    <textarea id="comment-${r.id}" rows="1" placeholder="Заметки для себя..." class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg text-xs text-slate-800 dark:text-white focus:outline-none focus:border-indigo-400">${r.comment || ''}</textarea>
+                                    <button onclick="saveComment(${r.id})" class="bg-slate-400 hover:bg-slate-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition whitespace-nowrap">💾 Сохранить</button>
                                 </div>
                             </div>
                         </div>
