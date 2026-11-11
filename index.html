@@ -240,13 +240,14 @@
     </div>
 
     <script>
+        // ИСПРАВЛЕННЫЙ ПРАВИЛЬНЫЙ КЛЮЧ
         const BIN_ID = "6af3158dffd5d16053b6a4ae"; 
-        const MASTER_KEY = "$2a$10$5OG8yAXzsTfGHDGr/POtMOcu6YnKqlOE1CCYpXlRCCiVp7AwWOe";
+        const MASTER_KEY = "$2a$10$5OG8yAXzsTfGHDGr/POtMOcu6YnKqlOE1CCYpXFlgRCCiVp7AwWOe";
         const API_URL = "https://api.jsonbin.io/v3/b/" + BIN_ID;
         
         let reports = [];
         let isFetching = false;
-        let isSaving = false; // НОВЫЙ ФЛАГ: Защита от перезаписи при сохранении
+        let isSaving = false; 
         let currentFilter = 'active';
         let lastCount = 0; 
         const PSYCHOLOGIST_PASSWORD = 'bagdagul';
@@ -394,7 +395,6 @@
 
         // ГЛАВНАЯ ФУНКЦИЯ ПОЛУЧЕНИЯ ДАННЫХ
         async function loadData() {
-            // БЛОКИРУЕМ ЗАГРУЗКУ, ЕСЛИ СЕЙЧАС ИДЕТ СОХРАНЕНИЕ
             if (isFetching || isSaving) return;
             
             if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') return;
@@ -436,14 +436,14 @@
 
         // ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ
         function forceReload() {
-            isSaving = false; // Сбрасываем блокировку
+            isSaving = false;
             loadData();
             alert('🔄 Данные обновлены!');
         }
 
         // СОХРАНЕНИЕ ДАННЫХ (С ЗАЩИТОЙ)
         async function saveData() {
-            isSaving = true; // Включаем защиту от автообновления
+            isSaving = true;
             try {
                 const res = await fetch(API_URL, {
                     method: 'PUT', 
@@ -452,7 +452,6 @@
                 });
                 if (!res.ok) throw new Error("Ошибка сохранения");
                 
-                // Даем серверу 1.5 секунды, чтобы он обновил кэш
                 setTimeout(() => { isSaving = false; }, 1500);
                 return true;
             } catch (e) { 
@@ -582,28 +581,23 @@
             }
         }
 
-        // ИСПРАВЛЕННАЯ ФУНКЦИЯ УДАЛЕНИЯ
         async function deleteReport(id) {
             if (!confirm('⚠️ Вы уверены, что хотите удалить эту заявку?')) return;
             
-            const backupReports = [...reports]; // Сохраняем копию на случай ошибки
+            const backupReports = [...reports];
             
-            // Мгновенно удаляем с экрана
             reports = reports.filter(r => String(r.id) !== String(id)); 
             renderReports(); 
             renderMyTickets(); 
             updateChart(); 
             
-            // Отправляем в облако (ждем завершения)
             const success = await saveData();
             
             if (success) {
                 lastCount = reports.length;
             } else {
-                // Если интернет отвалился, возвращаем заявку обратно
                 reports = backupReports;
                 renderReports(); renderMyTickets(); updateChart();
-                alert("Не удалось удалить заявку. Проверьте интернет.");
             }
         }
 
@@ -741,8 +735,8 @@
             }
         };
         
-        // Проверяем новые сообщения каждые 3 секунды
-        setInterval(loadData, 3000); 
+        // УВЕЛИЧИЛИ ИНТЕРВАЛ ДО 10 СЕКУНД, ЧТОБЫ НЕ БЫЛО ОШИБКИ 429
+        setInterval(loadData, 10000); 
     </script>
 </body>
 </html>
