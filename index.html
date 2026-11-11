@@ -61,10 +61,14 @@
             
             <div id="myTicketsSection" class="hidden bg-white dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-2xl p-5 shadow-sm transition-colors relative">
                 <div id="newReplyBadge" class="hidden absolute -top-3 -right-2 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg animate-bounce">🔔 Новый ответ!</div>
+                
                 <div class="flex items-center justify-between mb-3">
                     <h2 class="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
                         <span>📌</span> Мои сообщения
                     </h2>
+                    <button onclick="hideMyTickets()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition" title="Скрыть">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
                 </div>
                 <div id="myTicketsList" class="space-y-3"></div>
             </div>
@@ -107,43 +111,62 @@
                 </p>
             </div>
 
-            <div class="bg-white dark:bg-slate-800 p-5 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
-                <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Сообщить о ситуации</h2>
-                <form id="reportForm" onsubmit="submitReport(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Ваше имя и фамилия</label>
-                        <input type="text" id="myName" required placeholder="Например: Алишер Каримов" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition">
-                        <p class="text-[11px] text-rose-500 dark:text-rose-400 mt-1">🔒 Видит только психолог!</p>
+            <button id="openFormBtn" onclick="showReportForm()" class="hidden w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-4 rounded-2xl shadow-md transition text-sm flex items-center justify-center gap-2">
+                <span>✍️</span> Написать обращение психологу
+            </button>
+
+            <div id="formContainer" class="bg-white dark:bg-slate-800 p-5 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors relative">
+                
+                <div id="closedNotice" class="hidden text-center py-6 space-y-3">
+                    <div class="text-4xl">🚫</div>
+                    <h3 class="text-lg font-bold text-rose-600 dark:text-rose-400">Приём обращений закрыт</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Психолог временно приостановил приём новых сообщений. Пожалуйста, зайдите позже.</p>
+                </div>
+
+                <div id="actualForm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Сообщить о ситуации</h2>
+                        <button onclick="hideReportForm()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition p-1" title="Закрыть форму">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
+                    
+                    <form id="reportForm" onsubmit="submitReport(event)" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Ваш класс</label>
-                            <input type="text" id="myClass" required placeholder="8 «Б»" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition">
+                            <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Ваше имя и фамилия</label>
+                            <input type="text" id="myName" required placeholder="Например: Алишер Каримов" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition">
+                            <p class="text-[11px] text-rose-500 dark:text-rose-400 mt-1">🔒 Видит только психолог!</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Ваш класс</label>
+                                <input type="text" id="myClass" required placeholder="8 «Б»" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Кто обижает</label>
+                                <input type="text" id="bullyName" required placeholder="Имя или группа" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition">
+                            </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Кто обижает</label>
-                            <input type="text" id="bullyName" required placeholder="Имя или группа" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition">
+                            <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Тип проблемы</label>
+                            <select id="myCategory" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition">
+                                <option value="Оскорбления / Слова">Оскорбления / Слова</option>
+                                <option value="Физическое насилие">Физическое насилие</option>
+                                <option value="Кибербуллинг (в сети)">Кибербуллинг (в сети)</option>
+                                <option value="Игнорирование / Бойкот">Игнорирование / Бойкот</option>
+                                <option value="Порча вещей">Порча вещей</option>
+                                <option value="Другое">Другое</option>
+                            </select>
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Тип проблемы</label>
-                        <select id="myCategory" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition">
-                            <option value="Оскорбления / Слова">Оскорбления / Слова</option>
-                            <option value="Физическое насилие">Физическое насилие</option>
-                            <option value="Кибербуллинг (в сети)">Кибербуллинг (в сети)</option>
-                            <option value="Игнорирование / Бойкот">Игнорирование / Бойкот</option>
-                            <option value="Порча вещей">Порча вещей</option>
-                            <option value="Другое">Другое</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Что произошло?</label>
-                        <textarea id="myDesc" rows="4" required placeholder="Опишите ситуацию..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition"></textarea>
-                    </div>
-                    <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md transition">
-                        Отправить психологу конфиденциально
-                    </button>
-                </form>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Что произошло?</label>
+                            <textarea id="myDesc" rows="4" required placeholder="Опишите ситуацию..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 transition"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-3.5 rounded-xl text-sm shadow-md transition">
+                            Отправить психологу конфиденциально
+                        </button>
+                    </form>
+                </div>
             </div>
 
             <div class="bg-rose-500 text-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
@@ -165,7 +188,8 @@
                     <h2 class="text-xl font-bold text-slate-900 dark:text-white">Кабинет психолога</h2>
                     <p class="text-sm text-slate-500 dark:text-slate-400">Журнал конфиденциальных обращений</p>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="toggleSiteStatus()" id="toggleSiteBtn" class="bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-400 text-red-700 text-xs font-bold px-3 py-2 rounded-xl transition">🔒 Закрыть приём</button>
                     <button onclick="forceReload()" class="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-400 text-indigo-700 text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1">🔄 Обновить</button>
                     <button onclick="logoutPsychologist()" class="bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/50 dark:text-rose-400 text-rose-700 text-xs font-bold px-4 py-2 rounded-xl transition">🚪 Выйти</button>
                 </div>
@@ -210,7 +234,11 @@
 
     <!-- Модалка Входа -->
     <div id="loginModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full shadow-xl space-y-4 transition-colors">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full shadow-xl space-y-4 transition-colors relative">
+            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+
             <div class="text-center mb-2">
                 <div class="text-3xl mb-2">👩‍⚕️</div>
                 <h3 class="font-bold text-lg text-slate-900 dark:text-white">Вход для психолога</h3>
@@ -231,7 +259,11 @@
 
     <!-- Модалка Успешной отправки -->
     <div id="successModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full shadow-xl text-center space-y-4 transition-colors">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full shadow-xl text-center space-y-4 transition-colors relative">
+            <button onclick="closeSuccessModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+
             <div class="text-4xl">✅</div>
             <h3 class="font-bold text-lg text-slate-900 dark:text-white">Обращение отправлено!</h3>
             <p class="text-xs text-slate-600 dark:text-slate-300">Психолог уже видит ваше сообщение. Статус и ответ появятся на главной странице в блоке <b>«📌 Мои сообщения»</b>.</p>
@@ -240,7 +272,6 @@
     </div>
 
     <script>
-        // ИСПРАВЛЕННЫЙ ПРАВИЛЬНЫЙ КЛЮЧ
         const BIN_ID = "6af3158dffd5d16053b6a4ae"; 
         const MASTER_KEY = "$2a$10$5OG8yAXzsTfGHDGr/POtMOcu6YnKqlOE1CCYpXFlgRCCiVp7AwWOe";
         const API_URL = "https://api.jsonbin.io/v3/b/" + BIN_ID;
@@ -255,6 +286,8 @@
         let statsChartInstance = null;
         
         let lastSeenReplyTime = localStorage.getItem('safe_school_last_reply') || '0';
+        let isMyTicketsClosed = false; 
+        let isSiteClosed = false; 
 
         function setHeaderButton(text, onclickFunc) {
             document.getElementById('btnText').innerText = text;
@@ -264,6 +297,21 @@
         function togglePasswordVisibility() {
             const input = document.getElementById('loginPassword');
             input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function hideMyTickets() {
+            isMyTicketsClosed = true;
+            document.getElementById('myTicketsSection').classList.add('hidden');
+        }
+
+        function hideReportForm() {
+            document.getElementById('formContainer').classList.add('hidden');
+            document.getElementById('openFormBtn').classList.remove('hidden');
+        }
+
+        function showReportForm() {
+            document.getElementById('formContainer').classList.remove('hidden');
+            document.getElementById('openFormBtn').classList.add('hidden');
         }
 
         // --- ТЕМНАЯ ТЕМА ---
@@ -348,7 +396,10 @@
             const section = document.getElementById('myTicketsSection'), list = document.getElementById('myTicketsList');
             const myReports = reports.filter(r => myReportIds.includes(r.id));
             
-            if (myReports.length === 0) { section.classList.add('hidden'); return; }
+            if (myReports.length === 0 || isMyTicketsClosed) { 
+                section.classList.add('hidden'); 
+                return; 
+            }
             section.classList.remove('hidden');
             
             let hasNewReply = false;
@@ -393,10 +444,42 @@
             renderReports();
         }
 
-        // ГЛАВНАЯ ФУНКЦИЯ ПОЛУЧЕНИЯ ДАННЫХ
+        // ВКЛЮЧЕНИЕ / ВЫКЛЮЧЕНИЕ ПРИЕМА
+        async function toggleSiteStatus() {
+            isSiteClosed = !isSiteClosed;
+            updateSiteUI();
+            await saveData();
+        }
+
+        function updateSiteUI() {
+            // На стороне ученика
+            if (isSiteClosed) {
+                document.getElementById('actualForm').classList.add('hidden');
+                document.getElementById('closedNotice').classList.remove('hidden');
+                document.getElementById('openFormBtn').classList.add('hidden');
+                document.getElementById('formContainer').classList.remove('hidden');
+            } else {
+                document.getElementById('actualForm').classList.remove('hidden');
+                document.getElementById('closedNotice').classList.add('hidden');
+                document.getElementById('openFormBtn').classList.add('hidden');
+                document.getElementById('formContainer').classList.remove('hidden');
+            }
+
+            // На стороне психолога
+            const toggleBtn = document.getElementById('toggleSiteBtn');
+            if (toggleBtn) {
+                if (isSiteClosed) {
+                    toggleBtn.innerText = "🟢 Открыть приём";
+                    toggleBtn.className = "bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-400 text-emerald-700 text-xs font-bold px-3 py-2 rounded-xl transition";
+                } else {
+                    toggleBtn.innerText = "🔒 Закрыть приём";
+                    toggleBtn.className = "bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-400 text-red-700 text-xs font-bold px-3 py-2 rounded-xl transition";
+                }
+            }
+        }
+
         async function loadData() {
             if (isFetching || isSaving) return;
-            
             if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') return;
             
             isFetching = true;
@@ -410,21 +493,22 @@
                 
                 const data = await res.json();
                 
-                if (data && data.posts) {
-                    if (data.posts.length > lastCount && lastCount > 0) {
+                if (data) {
+                    reports = data.posts || [];
+                    isSiteClosed = data.isSiteClosed || false;
+                    
+                    if (reports.length > lastCount && lastCount > 0) {
                         if (localStorage.getItem('safe_school_psychologist') === 'true') {
                             document.getElementById('newBadge').classList.remove('hidden');
                         }
                     }
-                    lastCount = data.posts.length;
+                    lastCount = reports.length;
                     
-                    if (JSON.stringify(reports) !== JSON.stringify(data.posts)) {
-                        reports = data.posts;
-                        renderReports(); 
-                        renderMyTickets(); 
-                        updateChart();
-                    }
-                } else if (data === null || data === undefined) {
+                    updateSiteUI();
+                    renderReports(); 
+                    renderMyTickets(); 
+                    updateChart();
+                } else {
                      await saveData();
                 }
             } catch (e) { 
@@ -434,21 +518,19 @@
             }
         }
 
-        // ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ
         function forceReload() {
             isSaving = false;
             loadData();
             alert('🔄 Данные обновлены!');
         }
 
-        // СОХРАНЕНИЕ ДАННЫХ (С ЗАЩИТОЙ)
         async function saveData() {
             isSaving = true;
             try {
                 const res = await fetch(API_URL, {
                     method: 'PUT', 
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
-                    body: JSON.stringify({ posts: reports })
+                    body: JSON.stringify({ posts: reports, isSiteClosed: isSiteClosed })
                 });
                 if (!res.ok) throw new Error("Ошибка сохранения");
                 
@@ -483,6 +565,7 @@
             setFilter('active'); 
             localStorage.setItem('safe_school_psychologist', 'true');
             localStorage.setItem('safe_school_view', 'psychologist');
+            updateSiteUI();
             updateChart();
             loadData(); 
         }
@@ -504,7 +587,7 @@
                 
                 const myReports = reports.filter(r => myReportIds.includes(r.id));
                 const hasReplies = myReports.some(r => r.replyToStudent);
-                if (hasReplies) {
+                if (hasReplies && !isMyTicketsClosed) {
                     setTimeout(() => {
                         document.getElementById('myTicketsSection').scrollIntoView({ behavior: 'smooth' });
                     }, 500);
@@ -513,6 +596,7 @@
             
             localStorage.setItem('safe_school_last_reply', Date.now().toString());
             document.getElementById('newReplyBadge').classList.add('hidden');
+            updateSiteUI();
         }
 
         function logoutPsychologist() {
@@ -526,6 +610,11 @@
 
         async function submitReport(e) {
             e.preventDefault();
+            if (isSiteClosed) {
+                alert('Приём обращений временно закрыт психологом.');
+                return;
+            }
+
             const newReport = {
                 id: Date.now(), 
                 name: document.getElementById('myName').value, 
@@ -543,6 +632,8 @@
             reports.unshift(newReport); 
             myReportIds.push(newReport.id); 
             localStorage.setItem('safe_school_my_reports', JSON.stringify(myReportIds));
+            
+            isMyTicketsClosed = false; 
             
             await saveData(); 
             
@@ -637,6 +728,8 @@
 
         function renderReports() {
             const listContainer = document.getElementById('reportsList');
+            if (!listContainer) return; // Если мы на странице ученика
+
             document.getElementById('statTotal').innerText = reports.length;
 
             let filtered = [];
@@ -644,7 +737,9 @@
             else if (currentFilter === 'resolved') filtered = reports.filter(r => r.status === 'Решено');
             else filtered = reports;
 
-            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const searchInput = document.getElementById('searchInput');
+            const searchText = searchInput ? searchInput.value.toLowerCase() : '';
+            
             if (searchText) {
                 filtered = filtered.filter(r => (r.name && r.name.toLowerCase().includes(searchText)) || (r.class && r.class.toLowerCase().includes(searchText)) || (r.bully && r.bully.toLowerCase().includes(searchText)));
             }
@@ -720,7 +815,6 @@
             }
         }
 
-        // ВОССТАНОВЛЕНИЕ СЕССИИ ПРИ ЗАГРУЗКЕ
         window.onload = () => {
             loadData();
             const isPsychologist = localStorage.getItem('safe_school_psychologist') === 'true';
@@ -734,8 +828,6 @@
                 switchToStudent();
             }
         };
-        
-        // УВЕЛИЧИЛИ ИНТЕРВАЛ ДО 10 СЕКУНД, ЧТОБЫ НЕ БЫЛО ОШИБКИ 429
         setInterval(loadData, 10000); 
     </script>
 </body>
